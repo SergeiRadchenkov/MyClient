@@ -11,36 +11,50 @@
 </head>
 <body>
     <div class="auth-container">
-        <img src="{% static 'images/logo.png' %}" alt="Логотип" class="logo">
+        <a href="{% url 'auth' %}">
+            <img src="{% static 'images/logo.png' %}" alt="Логотип" class="logo">
+        </a>
         <h1 class="auth-title">Регистрация</h1>
+
+        {% if messages %}
+            <div class="alert">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <form method="POST" class="form-container">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="first_name">Имя:</label>
-                <input type="text" id="first_name" name="first_name" required>
-            </div>
-            <div class="form-group">
-                <label for="last_name">Фамилия:</label>
-                <input type="text" id="last_name" name="last_name" required>
-            </div>
-            <div class="form-group">
-                <label for="specialty">Специальность:</label>
-                <input type="text" id="specialty" name="specialty" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Логин (эл. почта):</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Пароль:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <div class="form-group">
-                <label for="password2">Повторите пароль:</label>
-                <input type="password" id="password2" name="password2" required>
-            </div>
-            <button type="submit" class="submit-btn">Зарегистрироваться</button>
-        </form>
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="first_name">Имя:</label>
+            <input type="text" id="first_name" name="first_name" value="{{ first_name }}" required>
+        </div>
+        <div class="form-group">
+            <label for="last_name">Фамилия:</label>
+            <input type="text" id="last_name" name="last_name" value="{{ last_name }}" required>
+        </div>
+        <div class="form-group">
+            <label for="specialty">Специальность:</label>
+            <input type="text" id="specialty" name="specialty" value="{{ specialty }}" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Логин (эл. почта):</label>
+            <input type="email" id="email" name="email" value="{{ email }}" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="password2">Повторите пароль:</label>
+            <input type="password" id="password2" name="password2" required>
+        </div>
+    <button type="submit" class="submit-btn">Зарегистрироваться</button>
+</form>
+        <div class="extra-links">
+            <a href="{% url 'login' %}">Уже есть пароль?</a>
+        </div>
     </div>
     <!-- Нижний колонтитул -->
     <footer class="footer">

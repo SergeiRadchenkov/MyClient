@@ -5,6 +5,38 @@
 {% block title %}Клиенты{% endblock %}
 
 {% block content %}
-<h1>Клиенты</h1>
 <!-- Контент страницы -->
+<div class="profile-info">
+    <p><strong>Имя и Фамилия:</strong> {{ first_name }} {{ last_name }}</p>
+    <p><strong>Специальность:</strong> {{ specialization }}</p>
+    <p><strong>Логин (эл. почта):</strong> {{ user }}</p>
+    <!-- Шестерёнка видна только если show_settings_btn -->
+    {% if show_settings_btn %}
+        <a href="{% url 'settings' %}" class="settings-btn">
+            <i class="fa fa-cogs"></i> <!-- Иконка шестерёнки -->
+        </a>
+    {% endif %}
+</div>
+<div class="profile-info">
+    <p><strong>Имя и Фамилия:</strong> {{ first_name }} {{ last_name }}</p>
+    <p><strong>Специальность:</strong> {{ specialization }}</p>
+    <p><strong>Логин (эл. почта):</strong> {{ user }}</p>
+    <!-- Шестерёнка видна только если show_settings_btn -->
+    {% if show_settings_btn %}
+        <a href="{% url 'settings' %}" class="settings-btn">
+            <i class="fa fa-cogs"></i> <!-- Иконка шестерёнки -->
+        </a>
+    {% endif %}
+</div>
+<div class="profile-info">
+    <p><strong>Имя и Фамилия:</strong> {{ first_name }} {{ last_name }}</p>
+    <p><strong>Специальность:</strong> {{ specialization }}</p>
+    <p><strong>Логин (эл. почта):</strong> {{ user }}</p>
+    <!-- Шестерёнка видна только если show_settings_btn -->
+    {% if show_settings_btn %}
+        <a href="{% url 'settings' %}" class="settings-btn">
+            <i class="fa fa-cogs"></i> <!-- Иконка шестерёнки -->
+        </a>
+    {% endif %}
+</div>
 {% endblock %}

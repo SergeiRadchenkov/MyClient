@@ -1,0 +1,17 @@
+<!-- MyClient/templates/MyClient/settings.html -->
+
+{% extends 'MyClient/profile.html' %}
+
+{% block title %}Настройки{% endblock %}
+
+{% block extra_content %}
+<div class="settings-buttons">
+    <a href="{% url 'edit_profile' %}" class="btn btn-primary">Редактировать профиль</a>
+    <a href="{% url 'logout' %}" class="btn btn-primary">Выйти</a> <!-- Кнопка выхода -->
+
+    <!-- Кнопка для открытия модального окна удаления профиля -->
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+        Удалить профиль
+    </button>
+</div>
+{% endblock %}

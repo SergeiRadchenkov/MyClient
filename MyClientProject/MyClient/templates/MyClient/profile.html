@@ -5,6 +5,43 @@
 {% block title %}Профиль{% endblock %}
 
 {% block content %}
-<h1>Профиль</h1>
+
+<!-- Модальное окно -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content custom-modal-content"> <!-- Добавлен класс для стилизации -->
+            <div class="modal-header custom-modal-header"> <!-- Добавлен класс для стилизации -->
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить свой профиль?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Нет</button>
+                <!-- Форма для отправки запроса на удаление профиля -->
+                <form method="post" action="{% url 'delete_profile' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Да</button> <!-- Кнопка "Да" стилизована как btn-primary -->
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Контент страницы -->
+<div class="profile-info">
+    <p><strong>Имя и Фамилия:</strong> {{ first_name }} {{ last_name }}</p>
+    <p><strong>Специальность:</strong> {{ specialization }}</p>
+    <p><strong>Логин (эл. почта):</strong> {{ user }}</p>
+    <!-- Шестерёнка видна только если show_settings_btn -->
+    {% if show_settings_btn %}
+        <a href="{% url 'settings' %}" class="settings-btn">
+            <i class="fa fa-cogs"></i> <!-- Иконка шестерёнки -->
+        </a>
+    {% endif %}
+    <!-- Дополнительный контент для расширения -->
+    {% block extra_content %}
+    {% endblock %}
+</div>
 {% endblock %}

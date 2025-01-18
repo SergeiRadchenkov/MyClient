@@ -38,6 +38,8 @@ body {
 
 /* Полоса с навигацией */
 .navbar {
+    display: flex;
+    justify-content: center;
     background: #03a9f4;
     padding: 10px 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -81,12 +83,57 @@ body {
 
 /* Основной контент */
 main {
-    padding: 20px;
-    background: white;
+    padding: 30px;
+    background: #ffffff; /* Белый фон */
     margin: 20px auto;
-    max-width: 1200px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    max-width: 1000px; /* Уменьшаем ширину */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень */
+    border-radius: 10px; /* Закругленные углы */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Стили для текстовых блоков в профиле */
+main p {
+    font-size: 18px;
+    line-height: 1.6;
+    color: #333;
+    font-weight: 400;
+    margin-bottom: 15px; /* Отступы между блоками */
+}
+
+/* Стили для заголовков в контенте */
+main p strong {
+    font-size: 20px;
+    color: #0288d1; /* Цвет заголовков */
+    font-weight: 700;
+}
+
+/* Стили для блока с информацией */
+.profile-info {
+    padding: 20px;
+    background: #80deea; /* Голубой фон */
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Легкая тень */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Плавный переход */
+    position: relative;
+}
+
+/* Эффект при наведении на блок с информацией */
+.profile-info:hover {
+    transform: scale(1.02); /* Легкое увеличение */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Увеличенная тень */
+}
+
+/* Стили для контейнера с профилем */
+.profile-header {
+    font-size: 26px;
+    font-weight: bold;
+    color: #0288d1;
+    text-align: center;
+    margin-bottom: 20px;
+    text-transform: uppercase; /* Заглавные буквы */
 }
 
 /* Нижний колонтитул */
@@ -95,7 +142,16 @@ main {
     padding: 10px;
     background: #0288d1;
     color: white;
+    bottom: 0;
+    width: 100%;
+}
+
+.footer-auth {
     position: fixed;
+    text-align: center;
+    padding: 10px;
+    background: #0288d1;
+    color: white;
     bottom: 0;
     width: 100%;
 }
@@ -111,7 +167,7 @@ main {
 
 .auth-title {
     font-size: 28px;
-    margin-bottom: 30px;
+    margin-top: 30px;
     color: #0288d1;
     text-transform: uppercase;
     font-weight: bold;
@@ -196,6 +252,27 @@ main {
     max-width: 400px;
 }
 
+.form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-container .btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    color: white;
+    text-decoration: none;
+}
+
+.form-container .btn-primary {
+    background-color: #0288d1;
+}
+
+.form-container .btn-danger {
+    background-color: red;
+}
+
 /* Группа полей ввода */
 .form-group {
     background-color: #80deea; /* Гладкий голубой фон */
@@ -258,14 +335,153 @@ main {
 .extra-links {
     margin-top: 20px;
     font-size: 14px;
+    display: flex;
+    flex-direction: column; /* Располагает ссылки вертикально */
 }
 
 .extra-links a {
     color: #0288d1;
     text-decoration: none;
     transition: color 0.3s ease;
+    margin-bottom: 10px; /* Добавляем отступ между ссылками */
 }
 
 .extra-links a:hover {
     color: #03a9f4;
+}
+
+.settings-btn {
+    position: absolute; /* Позволяет позиционировать шестерёнку внутри .profile-info */
+    top: 10px; /* Отступ от верхней границы */
+    right: 10px; /* Отступ от правой границы */
+    font-size: 24px; /* Размер шестерёнки */
+    color: #333; /* Цвет шестерёнки */
+    text-decoration: none; /* Убирает подчеркивание */
+}
+
+.settings-btn:hover {
+    color: #0288d1;
+}
+
+.settings-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.settings-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 20px;
+}
+
+.settings-buttons .btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    color: white;
+    text-decoration: none;
+}
+
+.settings-buttons .btn-primary {
+    background-color: #0288d1;
+}
+
+.settings-buttons .btn-danger {
+    background-color: red;
+}
+
+.alert {
+    background-color: #f8d7da; /* Светло-красный фон */
+    color: #721c24; /* Темно-красный цвет текста */
+    border: 1px solid #f5c6cb; /* Светло-красная рамка */
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px; /* Отступ снизу */
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Легкая тень */
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease; /* Плавный переход */
+}
+
+.alert .icon {
+    margin-right: 10px; /* Отступ от иконки */
+    font-size: 20px; /* Размер иконки */
+    color: #721c24; /* Цвет иконки, соответствует цвету текста */
+}
+
+.alert.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.alert.hide {
+    transform: translateY(-20px);
+    opacity: 0;
+}
+
+/* Стиль для ошибочных полей ввода */
+.form-group input:invalid {
+    box-shadow: 0 0 5px rgba(227, 52, 47, 0.7); /* Легкое свечение */
+}
+
+/* Стиль для ошибок в формах */
+.auth-form input:invalid {
+    box-shadow: 0 0 5px rgba(227, 52, 47, 0.7);
+}
+
+/* Стили для кнопки отправки при ошибке */
+.submit-btn.error {
+    background: #e3342f; /* Красный фон для кнопки ошибки */
+    color: white;
+    border-color: #e3342f;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.submit-btn.error:hover {
+    background: #c81d29; /* Темнее при наведении */
+    transform: scale(1.05); /* Легкое увеличение */
+}
+
+/* Эффект при наведении на блок с информацией */
+.profile-info {
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.profile-info:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Стиль для модального окна с голубым фоном и глянцевым эффектом */
+.custom-modal-content {
+    background-color: #e0f7fa; /* Нежный голубой цвет */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #b2ebf2; /* Легкая голубая рамка */
+    background: linear-gradient(145deg, #e0f7fa, #b2ebf2); /* Гладкий градиент с глянцевым эффектом */
+}
+
+/* Стиль для шапки модального окна */
+.custom-modal-header {
+    background-color: #b2ebf2; /* Голубая шапка */
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    color: #004d40; /* Тёмный текст для контраста */
+}
+
+/* Стиль для кнопки "Да" */
+.custom-modal-footer .btn-primary {
+    background-color: #00796b; /* Тёмный зелёный цвет для кнопки */
+    border-color: #004d40; /* Тёмный цвет для границ */
+}
+
+.custom-modal-footer .btn-primary:hover {
+    background-color: #004d40; /* При наведении кнопка станет темнее */
+    border-color: #00796b;
 }
