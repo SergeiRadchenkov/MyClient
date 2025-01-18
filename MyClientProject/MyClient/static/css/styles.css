@@ -1,0 +1,271 @@
+/* style.css Общие настройки */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to bottom, #e0f7fa, #80deea); /* Голубой градиент */
+    color: #333;
+}
+
+/* Верхняя полоса с эмблемой */
+.header {
+    background: linear-gradient(to right, #0288d1, #03a9f4); /* Синий градиент */
+    padding: 15px 20px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-evenly; /* Равномерное распределение */
+    align-items: center;
+}
+
+.logo {
+    height: 120px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); /* Тень для логотипа */
+    border-radius: 5px; /* Закругление углов */
+}
+
+/* Название приложения */
+.app-name {
+    font-size: 50px; /* Размер шрифта */
+    font-weight: bold;
+    color: #ffffff;
+    padding: 5px 15px;
+    border: 2px solid #ffffff; /* Рамка */
+    border-radius: 10px;
+    background-color: #0288d1;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); /* Тень для названия */
+}
+
+/* Полоса с навигацией */
+.navbar {
+    background: #03a9f4;
+    padding: 10px 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar ul li {
+    margin: 0 15px;
+}
+
+.navbar ul li a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    font-size: 19px; /* Увеличение размера текста */
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+
+.navbar ul li a:hover {
+    background: #0288d1; /* Более тёмный синий */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Тень при наведении */
+}
+
+/* Активная ссылка */
+.navbar ul li a.active {
+    background: #ffffff; /* Белый фон для активной ссылки */
+    color: #0288d1; /* Цвет текста активной ссылки */
+    font-weight: bold;
+    border: 2px solid #0288d1; /* Рамка активной ссылки */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Тень для активной ссылки */
+}
+
+/* Основной контент */
+main {
+    padding: 20px;
+    background: white;
+    margin: 20px auto;
+    max-width: 1200px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* Нижний колонтитул */
+.footer {
+    text-align: center;
+    padding: 10px;
+    background: #0288d1;
+    color: white;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+.auth-container {
+    text-align: center;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.auth-title {
+    font-size: 28px;
+    margin-bottom: 30px;
+    color: #0288d1;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.auth-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    text-decoration: none;
+    padding: 15px 25px;
+    font-size: 18px;
+    color: white;
+    border-radius: 5px;
+    background: #0288d1;
+    transition: transform 0.3s, background-color 0.3s;
+}
+
+.auth-btn-animate:hover {
+    transform: scale(1.2);
+    background-color: #03a9f4;
+}
+
+/* Стили для форм */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.auth-form label {
+    font-size: 16px;
+    color: #333;
+    text-align: left;
+    width: 100%;
+}
+
+.auth-form input {
+    width: 80%;
+    max-width: 400px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.auth-form input:focus {
+    border-color: #0288d1;
+    box-shadow: 0 0 5px rgba(2, 136, 209, 0.5);
+}
+
+.auth-form button {
+    width: 80%;
+    max-width: 400px;
+    padding: 10px 15px;
+    font-size: 18px;
+    color: white;
+    background: #0288d1;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+}
+
+.auth-form button:hover {
+    background: #03a9f4;
+    transform: scale(1.05);
+}
+
+/* Обёртка для формы */
+.form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 400px;
+}
+
+/* Группа полей ввода */
+.form-group {
+    background-color: #80deea; /* Гладкий голубой фон */
+    padding: 15px; /* Отступы внутри */
+    border-radius: 10px; /* Закругленные углы */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Тень для объема */
+    margin-bottom: 20px; /* Отступ снизу */
+    transition: all 0.3s ease; /* Плавный переход */
+}
+
+.form-group:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Увеличенная тень */
+    transform: translateY(-2px); /* Легкое поднятие */
+}
+
+/* Метки полей */
+.form-group label {
+    font-weight: bold; /* Жирное начертание текста */
+    color: #0288d1; /* Тёмно-голубой цвет */
+    margin-bottom: 10px; /* Отступ снизу */
+    display: block; /* Блочное расположение */
+}
+
+/* Поля ввода */
+.form-group input {
+    width: 100%; /* Ширина на всю доступную площадь */
+    padding: 10px; /* Отступы внутри поля */
+    font-size: 16px; /* Размер шрифта */
+    border-radius: 5px; /* Закругленные углы */
+    border: 1px solid #0288d1; /* Тёмно-голубая рамка */
+    box-sizing: border-box; /* Для правильного расчета ширины */
+    transition: border 0.3s, box-shadow 0.3s; /* Плавное изменение рамки */
+}
+
+/* Эффект фокуса на поле ввода */
+.form-group input:focus {
+    border-color: #0288d1; /* Смена цвета рамки */
+    box-shadow: 0 0 5px rgba(2, 136, 209, 0.7); /* Легкое свечение вокруг поля */
+    outline: none; /* Убираем стандартную обводку */
+}
+
+/* Кнопка отправки */
+.submit-btn {
+    background: #0288d1;
+    color: white;
+    font-size: 18px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+    background-color: #03a9f4;
+    transform: scale(1.05);
+}
+
+/* Дополнительные ссылки */
+.extra-links {
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.extra-links a {
+    color: #0288d1;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.extra-links a:hover {
+    color: #03a9f4;
+}

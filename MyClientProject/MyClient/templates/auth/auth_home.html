@@ -1,0 +1,26 @@
+<!-- MyClient/templates/auth/auth_home.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добро пожаловать</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="auth-container">
+        <img src="{% static 'images/logo.png' %}" alt="Логотип" class="logo">
+        <h1 class="auth-title">Добро пожаловать в MyClient</h1>
+        <div class="auth-buttons">
+            <a href="{% url 'login' %}" class="auth-buttons auth-btn-animate">Авторизироваться</a>
+            <a href="{% url 'register' %}" class="auth-buttons auth-btn-animate">Зарегистрироваться</a>
+        </div>
+    </div>
+    <!-- Нижний колонтитул -->
+    <footer class="footer">
+        <p>© 2025 MyClient. Все права защищены.</p>
+    </footer>
+</body>
+</html>

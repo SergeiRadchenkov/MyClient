@@ -1,0 +1,46 @@
+<!-- MyClient/templates/base.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MyClient{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <!-- Верхняя глянцевая полоса с эмблемой -->
+    <header class="header">
+        <div class="logo-container">
+            <img src="{% static 'images/logo.png' %}" alt="MyClient" class="logo">
+        </div>
+        <div class="app-name">
+            MyClient
+        </div>
+    </header>
+
+    <!-- Полоса с навигацией -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="{% url 'schedule' %}" class="{% if request.path == '/schedule/' %}active{% endif %}">Расписание</a></li>
+            <li><a href="{% url 'clients' %}" class="{% if request.path == '/clients/' %}active{% endif %}">Клиенты</a></li>
+            <li><a href="{% url 'blocks' %}" class="{% if request.path == '/blocks/' %}active{% endif %}">Блоки</a></li>
+            <li><a href="{% url 'profile' %}" class="{% if request.path == '/profile/' %}active{% endif %}">Профиль</a></li>
+        </ul>
+    </nav>
+
+
+    <!-- Основной контент -->
+    <main>
+        {% block content %}
+        <!-- Здесь будет контент страницы -->
+        {% endblock %}
+    </main>
+
+    <!-- Нижний колонтитул -->
+    <footer class="footer">
+        <p>© 2025 MyClient. Все права защищены.</p>
+    </footer>
+</body>
+</html>
