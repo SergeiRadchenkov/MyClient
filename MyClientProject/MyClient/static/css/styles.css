@@ -485,3 +485,37 @@ main p strong {
     background-color: #004d40; /* При наведении кнопка станет темнее */
     border-color: #00796b;
 }
+
+.client-controls form {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap; /* Отключаем перенос строк внутри формы */
+}
+
+.client-controls .form-control,
+.client-controls .form-select {
+    width: 30%;
+    min-width: 200px; /* Минимальная ширина для читабельности */
+}
+
+.clients-top {
+    display: flex;
+    justify-content: space-around; /* Распределяет элементы с одинаковыми промежутками */
+    align-items: center;
+    width: 100%;
+}
+
+.search1 {
+    position: relative; /* Сохраняем позиционирование относительно родителя */
+    display: flex;      /* Выравниваем элементы в строку */
+    align-items: flex-start; /* Выравниваем элементы по верхнему краю */
+}
+
+.list-group {
+    position: absolute; /* Абсолютное позиционирование относительно родителя */
+    top: 100%; /* Располагаем ниже ячейки поиска */
+    left: 0; /* Привязываем к левому краю */
+    width: 100%; /* Ширина выпадающего списка равна ширине ячейки ввода */
+    z-index: 1000; /* Устанавливаем приоритет отображения */
+    background: white; /* Белый фон */
+}

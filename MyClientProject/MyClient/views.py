@@ -1,15 +1,16 @@
+'''views.py'''
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserChangeForm
 import re
 from django.core.exceptions import ValidationError
-from .models import Profile
-from .forms import CustomUserChangeForm
+from .models import Profile, Client
+from .forms import CustomUserChangeForm, ClientForm
 from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.forms import PasswordChangeForm
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
 
 
 @login_required
@@ -20,7 +21,98 @@ def schedule(request):
 
 @login_required
 def clients(request):
-    return render(request, 'MyClient/clients.html')
+    search_query = request.GET.get('search', '').strip().lower()  # Удаляем лишние пробелы
+    sort_by = request.GET.get('sort', '')
+
+    clients = Client.objects.all().order_by('-created_at')  # Новые клиенты сверху
+    results = []
+
+    if search_query:
+        # Разделяем запрос на слова (например, "Иван Иванов")
+        search_terms = search_query.split()
+        if len(search_terms) == 2:  # Если два слова (имя и фамилия)
+            first_name, last_name = search_terms
+            for client in clients:
+                if first_name in client.first_name.lower() and last_name in client.last_name.lower():
+                    results.append({
+                        'id': client.id,
+                        'first_name': client.first_name,
+                        'last_name': client.last_name,
+                        'metro': client.metro,
+                        'street': client.street,
+                        'house_number': client.house_number,
+                        'entrance': client.entrance,
+                        'floor': client.floor,
+                    })
+        else:  # Если одно слово или больше двух
+            for client in clients:
+                if any(term in client.first_name.lower() for term in search_terms) or \
+                        any(term in client.last_name.lower() for term in search_terms) or \
+                        any(term in client.metro.lower() for term in search_terms) or \
+                        any(term in client.street.lower() for term in search_terms):
+                    results.append({
+                        'id': client.id,
+                        'first_name': client.first_name,
+                        'last_name': client.last_name,
+                        'metro': client.metro,
+                        'street': client.street,
+                        'house_number': client.house_number,
+                        'entrance' : client.entrance,
+                        'floor': client.floor,
+                    })
+        return render(request, 'MyClient/clients.html', {'clients': results})
+
+
+    def get_key_func(field):
+        def key_func(client):
+            value = getattr(client, field, "").lower()  # Преобразуем в нижний регистр
+            return value
+        return key_func
+
+    # Проверка на допустимые поля для сортировки
+    valid_sort_fields = ['first_name', 'last_name', 'metro',
+                         'street', 'created_at', 'price_online', 'price_offline']
+    if sort_by and sort_by in valid_sort_fields:
+        if sort_by == 'price_online':
+            clients = clients.order_by('-price_online')
+        elif sort_by == 'price_offline':
+            clients = clients.order_by('-price_offline')
+        else:
+            sort_key = get_key_func(sort_by)
+            clients = quicksort(clients, sort_key)
+    else:
+        # Если сортировка не указана или указано неправильное поле, по умолчанию сортировка по created_at
+        clients = clients.order_by('-created_at')
+
+    return render(request, 'MyClient/clients.html', {'clients': clients})
+
+
+def autocomplete(request):
+    query = request.GET.get('query', '').lower()
+    results = Client.objects.all()  # Получаем всех клиентов
+    clients = []
+
+    for result in results:
+        # Приводим к нижнему регистру и проверяем наличие подстроки в нужных полях
+        if (query in result.first_name.lower() or
+                query in result.last_name.lower() or
+                query in result.metro.lower() or
+                query in result.street.lower()):
+            # Добавляем клиента в список
+            clients.append({
+                'id': result.id,
+                'name': f'{result.first_name} {result.last_name}, метро {result.metro}, улица {result.street}'
+            })
+
+    # Возвращаем результат в формате JSON
+    return JsonResponse(clients, safe=False)
+
+
+@login_required
+def client_detail(request, client_id):
+    client = get_object_or_404(Client, id=client_id)
+    return render(request, 'MyClient/client_detail.html', {'client': client})
+
 
 @login_required
 def profile(request):
@@ -39,14 +131,17 @@ def profile(request):
     }
     return render(request, 'MyClient/profile.html', context)
 
+
 @login_required
 def blocks(request):
     return render(request, 'MyClient/blocks.html')
+
 
 def auth_redirect(request):
     if request.user.is_authenticated:
         return redirect('schedule')
     return render(request, 'auth/auth_home.html')
+
 
 def login_view(request):
     if request.method == 'POST':
@@ -59,6 +154,7 @@ def login_view(request):
         else:
             messages.error(request, 'Неправильный логин или пароль')
     return render(request, 'auth/login.html')
+
 
 def register_view(request):
     if request.method == 'POST':
@@ -162,9 +258,11 @@ def delete_profile(request):
     logout(request)
     return redirect('auth')
 
+
 def logout_view(request):
     logout(request)  # Выполняем выход пользователя
     return redirect('auth')  # Перенаправляем на страницу авторизации (или другую страницу)
+
 
 @login_required
 def reset_password(request):
@@ -191,3 +289,40 @@ def reset_password(request):
         return redirect('settings')
 
     return render(request, 'MyClient/reset_password.html')
+
+
+@login_required
+def add_client(request):
+    # Чтение станций метро из файла
+    metro_stations = []
+    try:
+        # Открытие файла и чтение станций метро
+        with open('metro_stations.txt', 'r', encoding='utf-8') as f:
+            metro_stations = [line.strip() for line in f.readlines()]
+    except FileNotFoundError:
+        # В случае если файл не найден
+        messages.error(request, 'Файл с метростанциями не найден.')
+
+    if request.method == 'POST':
+        form = ClientForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('clients')
+        else:
+            messages.error(request, 'Ошибка при добавлении клиента. Проверьте данные.')
+    else:
+        form = ClientForm()
+    return render(request, 'MyClient/add_client.html', {'form': form,
+                                                        'metro_stations': metro_stations})
+
+
+def quicksort(arr, key_func, reverse=False):
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[0]
+    less = [x for x in arr[1:] if key_func(x) <= key_func(pivot)]
+    greater = [x for x in arr[1:] if key_func(x) > key_func(pivot)]
+    if reverse:
+        return quicksort(greater, key_func, reverse) + [pivot] + quicksort(less, key_func, reverse)
+    else:
+        return quicksort(less, key_func, reverse) + [pivot] + quicksort(greater, key_func, reverse)

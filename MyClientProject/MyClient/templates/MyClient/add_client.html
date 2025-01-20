@@ -1,0 +1,91 @@
+<!-- MyClient/templates/MyClient/add_client.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить клиента</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="auth-container">
+        <a href="{% url 'schedule' %}">
+            <img src="{% static 'images/logo.png' %}" alt="Логотип" class="logo">
+        </a>
+        <h1 class="auth-title">Добавить клиента</h1>
+
+        {% if messages %}
+            <div class="alert">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" class="form-container">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="first_name">Имя:</label>
+                <input type="text" id="first_name" name="first_name" value="{{ form.first_name.value }}" required>
+            </div>
+            <div class="form-group">
+                <label for="last_name">Фамилия:</label>
+                <input type="text" id="last_name" name="last_name" value="{{ form.last_name.value }}" required>
+            </div>
+            <div class="form-group">
+                <label for="metro">Метро:</label>
+                <input type="text" id="metro" name="metro" list="metro-list" value="{{ form.metro.value|default_if_none:'' }}" placeholder="Введите станцию метро...">
+                <datalist id="metro-list">
+                    {% for station in metro_stations %}
+                        <option value="{{ station }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+            <div class="form-group">
+                <label for="street">Улица:</label>
+                <input type="text" id="street" name="street" value="{{ form.street.value }}" required>
+            </div>
+            <div class="form-group">
+                <label for="house_number">Номер дома:</label>
+                <input type="text" id="house_number" name="house_number" value="{{ form.house_number.value }}" required>
+            </div>
+            <div class="form-group">
+                <label for="entrance">Подъезд:</label>
+                <input type="text" id="entrance" name="entrance" value="{{ form.entrance.value }}">
+            </div>
+            <div class="form-group">
+                <label for="floor">Этаж:</label>
+                <input type="text" id="floor" name="floor" value="{{ form.floor.value }}">
+            </div>
+            <div class="form-group">
+                <label for="intercom">Домофон:</label>
+                <input type="text" id="intercom" name="intercom" value="{{ form.intercom.value }}">
+            </div>
+            <div class="form-group">
+                <label for="phone">Телефон:</label>
+                <input type="text" id="phone" name="phone" value="{{ form.phone.value }}">
+            </div>
+            <div class="form-group">
+                <label for="price_offline">Цена за работу оффлайн:</label>
+                <input type="number" id="price_offline" name="price_offline" value="{{ form.price_offline.value }}">
+            </div>
+            <div class="form-group">
+                <label for="price_online">Цена за работу онлайн:</label>
+                <input type="number" id="price_online" name="price_online" value="{{ form.price_online.value|default_if_none:0 }}">
+            </div>
+            <button type="submit" class="submit-btn">Сохранить</button>
+        </form>
+
+        <div class="extra-links">
+            <a href="{% url 'clients' %}">Отмена</a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 MyClient. Все права защищены.</p>
+    </footer>
+</body>
+</html>
+

@@ -6,37 +6,51 @@
 
 {% block content %}
 <!-- Контент страницы -->
-<div class="profile-info">
-    <p><strong>Имя и Фамилия:</strong> {{ first_name }} {{ last_name }}</p>
-    <p><strong>Специальность:</strong> {{ specialization }}</p>
-    <p><strong>Логин (эл. почта):</strong> {{ user }}</p>
-    <!-- Шестерёнка видна только если show_settings_btn -->
-    {% if show_settings_btn %}
-        <a href="{% url 'settings' %}" class="settings-btn">
-            <i class="fa fa-cogs"></i> <!-- Иконка шестерёнки -->
-        </a>
-    {% endif %}
-</div>
-<div class="profile-info">
-    <p><strong>Имя и Фамилия:</strong> {{ first_name }} {{ last_name }}</p>
-    <p><strong>Специальность:</strong> {{ specialization }}</p>
-    <p><strong>Логин (эл. почта):</strong> {{ user }}</p>
-    <!-- Шестерёнка видна только если show_settings_btn -->
-    {% if show_settings_btn %}
-        <a href="{% url 'settings' %}" class="settings-btn">
-            <i class="fa fa-cogs"></i> <!-- Иконка шестерёнки -->
-        </a>
-    {% endif %}
-</div>
-<div class="profile-info">
-    <p><strong>Имя и Фамилия:</strong> {{ first_name }} {{ last_name }}</p>
-    <p><strong>Специальность:</strong> {{ specialization }}</p>
-    <p><strong>Логин (эл. почта):</strong> {{ user }}</p>
-    <!-- Шестерёнка видна только если show_settings_btn -->
-    {% if show_settings_btn %}
-        <a href="{% url 'settings' %}" class="settings-btn">
-            <i class="fa fa-cogs"></i> <!-- Иконка шестерёнки -->
-        </a>
-    {% endif %}
+<div class="container mt-4">
+    <!-- Раздел добавления и управления клиентами -->
+    <div class="client-controls mb-4">
+        <form method="GET" action="{% url 'clients' %}">
+            <div class="clients-top">
+                <div class="search1">
+                    <input type="text" name="search" id="search" class="form-control" placeholder="Поиск клиента" value="{{ request.GET.search }}">
+                    <ul id="search-results" class="list-group"></ul>
+                    <button type="submit" class="btn" style="background-color: #0288d1; color: white; border: none; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;">
+                    <i class="fas fa-search"></i>  <!-- Иконка лупы -->
+                    </button>
+                </div>
+                <div>
+                    <select name="sort" class="form-select">
+                        <optgroup label="Сортировать по...">
+                            <option value="date_added" {% if request.GET.sort == "date_added" %}selected{% endif %}>по дате добавления</option>
+                            <option value="first_name" {% if request.GET.sort == "first_name" %}selected{% endif %}>по имени</option>
+                            <option value="last_name" {% if request.GET.sort == "last_name" %}selected{% endif %}>по фамилии</option>
+                            <option value="metro" {% if request.GET.sort == "metro" %}selected{% endif %}>по метро</option>
+                            <option value="price_offline" {% if request.GET.sort == "price_offline" %}selected{% endif %}>по цене офлайн</option>
+                            <option value="price_online" {% if request.GET.sort == "price_online" %}selected{% endif %}>по цене онлайн</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div>
+                    <a href="{% url 'add_client' %}" class="btn" style="background-color: #0288d1; color: white; border: none; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;">
+                        <i class="fas fa-plus" style="font-size: 20px;"></i> <!-- Иконка плюса, можно настроить размер -->
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Список клиентов -->
+    <div class="client-list">
+        {% for client in clients %}
+        <div class="client-card mb-3 p-3" style="background-color: {% cycle '#f9f9f9' '#e9ecef' %}; cursor: pointer;" onclick="location.href='{% url 'client_detail' client.id %}'">
+            <div><strong>{{ client.first_name }} {{ client.last_name }}</strong>, метро {{ client.metro }}</div>
+            <div>улица {{ client.street }}, дом {{ client.house_number }}, подъезд {{ client.entrance }}, этаж {{ client.floor }}</div>
+        </div>
+        {% empty %}
+        <p>Клиенты не найдены.</p>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}
+
+
