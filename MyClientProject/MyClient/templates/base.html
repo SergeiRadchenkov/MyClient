@@ -84,14 +84,20 @@ document.getElementById('search').addEventListener('input', function() {
                     li.addEventListener('click', () => {
                         // Извлекаем только имя и фамилию из значения name
                         const fullName = client.name.split(' ');
-                        const firstName = fullName[0];  // Первая часть - имя
-                        const lastName = fullName[1].slice(0, -1);   // Вторая часть - фамилия
+                        const firstName = fullName[0].replace(',', '');  // Первая часть - имя
+                        const lastName = fullName.length > 1 ? fullName[1].slice(0, -1) : '';  // Вторая часть - фамилия (если есть)
 
                         // Прячем результаты
                         resultsContainer.style.display = 'none';
 
-                        // Перенаправляем на URL с параметром поиска, если нужно
-                        window.location.href = `?search=${firstName} ${lastName}`;
+                        // Формируем URL с параметром поиска
+                        let searchUrl = `?search=${firstName}`;
+                        if (lastName && lastName !== "метр" && lastName !== "улиц") {
+                            searchUrl += ` ${lastName}`; // Добавляем lastName только если он существует
+                        }
+
+                        // Перенаправляем на URL
+                        window.location.href = searchUrl;
 
                         // Очищаем поле ввода
                         document.getElementById('search').value = '';

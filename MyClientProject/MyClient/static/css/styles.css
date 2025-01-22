@@ -519,3 +519,44 @@ main p strong {
     z-index: 1000; /* Устанавливаем приоритет отображения */
     background: white; /* Белый фон */
 }
+
+/* Убираем стрелочки в браузере Chrome, Edge */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Убираем стрелочки в браузере Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.dropdown-menu {
+    background-color: white; /* Белый фон */
+    border: 1px solid #ccc;  /* Граница */
+    max-height: 200px;       /* Максимальная высота */
+    overflow-y: auto;        /* Скроллинг для длинного списка */
+    list-style: none;        /* Убираем точки перед элементами */
+    padding: 0;
+    margin: 0;
+    width: auto;             /* Автоматическая ширина */
+    min-width: 100%;         /* Минимальная ширина равна ширине поля ввода */
+    z-index: 1000;
+    position: absolute;      /* Абсолютное позиционирование */
+    left: 0;                 /* Привязка к левому краю родителя */
+    top: 100%;               /* Расположение сразу под полем ввода */
+    opacity: 1;              /* Полностью видимое */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Тень */
+    pointer-events: auto;    /* Убедимся, что взаимодействие возможно */
+}
+
+.dropdown-menu li {
+    padding: 8px 12px;        /* Внутренние отступы */
+    cursor: pointer;          /* Указатель мыши при наведении */
+    text-align: left;         /* Выравнивание текста по левому краю */
+}
+
+.dropdown-menu li:hover {
+    background-color: #f0f0f0; /* Изменение фона при наведении */
+}

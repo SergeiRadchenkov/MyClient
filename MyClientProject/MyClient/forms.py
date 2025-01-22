@@ -1,3 +1,4 @@
+'''forms.py'''
 from django import forms
 from django.contrib.auth.forms import UserChangeForm
 from .models import Profile, Client
@@ -7,7 +8,7 @@ from django.forms import ModelForm
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'username', 'specialization')  # добавьте нужные поля
+        fields = ('first_name', 'last_name', 'username', 'specialization')
 
     specialization = forms.CharField(max_length=255, required=False)  # поле для специальности
 
@@ -27,7 +28,7 @@ class ClientForm(ModelForm):
         widgets = {
             'last_name': forms.TextInput(attrs={'required': False}),
             'metro': forms.TextInput(attrs={'list': 'metro-list',
-                                            'class': 'form-control', 'placeholder': 'Введите станцию метро...',
+                                            'class': 'form-control',
                                             'required': False}),
             'street': forms.TextInput(attrs={'required': False}),
             'house_number': forms.TextInput(attrs={'required': False}),
@@ -38,3 +39,4 @@ class ClientForm(ModelForm):
             'price_offline': forms.NumberInput(attrs={'required': False}),
             'price_online': forms.NumberInput(attrs={'required': False}),
         }
+

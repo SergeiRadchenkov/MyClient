@@ -5,22 +5,24 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+
 class Client(models.Model):
     first_name = models.CharField("Имя", max_length=100)
-    last_name = models.CharField("Фамилия", max_length=100, blank=True)
-    metro = models.CharField("Метро", max_length=255, blank=True)
-    street = models.CharField("Улица", max_length=255, blank=True)
-    house_number = models.CharField("Номер дома", max_length=10, blank=True)
-    entrance = models.CharField("Подъезд", max_length=10, blank=True)
-    floor = models.CharField("Этаж", max_length=10, blank=True, null=True)
-    intercom = models.CharField("Домофон", max_length=50, blank=True, null=True)
-    phone = models.CharField("Телефон", max_length=15, blank=True, null=True)
-    price_offline = models.DecimalField("Цена за работу оффлайн", max_digits=10, decimal_places=2)
-    price_online = models.DecimalField("Цена за работу онлайн", max_digits=10, decimal_places=2)
+    last_name = models.CharField("Фамилия", max_length=100, blank=True, null=True, default='я')
+    metro = models.CharField("Метро", max_length=255, blank=True, null=True, default='я')
+    street = models.CharField("Улица", max_length=255, blank=True, null=True, default='я')
+    house_number = models.CharField("Номер дома", max_length=10, blank=True, null=True, default='я')
+    entrance = models.CharField("Подъезд", max_length=10, blank=True, null=True, default='я')
+    floor = models.CharField("Этаж", max_length=10, blank=True, null=True, default='я')
+    intercom = models.CharField("Домофон", max_length=50, blank=True, null=True, default='я')
+    phone = models.CharField("Телефон", max_length=20, blank=True, null=True, default='я')
+    price_offline = models.DecimalField("Цена за работу оффлайн", max_digits=10, decimal_places=2, blank=True, default=0)
+    price_online = models.DecimalField("Цена за работу онлайн", max_digits=10, decimal_places=2, blank=True, default=0)
     created_at = models.DateTimeField("Дата добавления", auto_now_add=True)
 
     class Meta:
         ordering = ['-created_at']  # Новые клиенты сверху
+
 
 
     def __str__(self):

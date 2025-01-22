@@ -43,13 +43,33 @@
     <div class="client-list">
         {% for client in clients %}
         <div class="client-card mb-3 p-3" style="background-color: {% cycle '#f9f9f9' '#e9ecef' %}; cursor: pointer;" onclick="location.href='{% url 'client_detail' client.id %}'">
-            <div><strong>{{ client.first_name }} {{ client.last_name }}</strong>, метро {{ client.metro }}</div>
-            <div>улица {{ client.street }}, дом {{ client.house_number }}, подъезд {{ client.entrance }}, этаж {{ client.floor }}</div>
+            <div><strong>{{ client.first_name }}{% if client.last_name != "я" %} {{ client.last_name }}{% endif %}</strong>{% if client.metro != "я" %}, метро {{ client.metro }}{% endif %}</div>
+            <div>{% if client.street != "я" %}улица {{ client.street }}, {% endif %}{% if client.house_number != "я" %}дом {{ client.house_number }}, {% endif %}{% if client.entrance != "я" %}подъезд {{ client.entrance }}, {% endif %}{% if client.floor != "я" %}этаж {{ client.floor }}, {% endif %}{% if client.intercom != "я" %}домофон {{ client.intercom }}{% endif %}</div>
         </div>
         {% empty %}
         <p>Клиенты не найдены.</p>
         {% endfor %}
     </div>
+    <div class="pagination">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&sort={{ sort_by }}">Назад</a>
+            </li>
+        {% endif %}
+        {% for page in page_obj.paginator.page_range %}
+            <li class="page-item {% if page == page_obj.number %}active{% endif %}">
+                <a class="page-link" href="?page={{ page }}&search={{ search_query }}&sort={{ sort_by }}">{{ page }}</a>
+            </li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&sort={{ sort_by }}">Вперёд</a>
+            </li>
+        {% endif %}
+    </ul>
+</div>
+
 </div>
 {% endblock %}
 

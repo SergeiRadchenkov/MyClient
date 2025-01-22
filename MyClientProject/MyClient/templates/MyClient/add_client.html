@@ -27,53 +27,51 @@
         <form method="POST" class="form-container">
             {% csrf_token %}
             <div class="form-group">
-                <label for="first_name">Имя:</label>
-                <input type="text" id="first_name" name="first_name" value="{{ form.first_name.value }}" required>
+                <label for="first_name">Имя<span style="color: red;">*</span>:</label>
+                    <input type="text" id="first_name" name="first_name" value="{{ first_name }}" required>
             </div>
             <div class="form-group">
                 <label for="last_name">Фамилия:</label>
-                <input type="text" id="last_name" name="last_name" value="{{ form.last_name.value }}" required>
+                <input type="text" id="last_name" name="last_name" value="{{ last_name }}">
             </div>
             <div class="form-group">
                 <label for="metro">Метро:</label>
-                <input type="text" id="metro" name="metro" list="metro-list" value="{{ form.metro.value|default_if_none:'' }}" placeholder="Введите станцию метро...">
-                <datalist id="metro-list">
-                    {% for station in metro_stations %}
-                        <option value="{{ station }}">
-                    {% endfor %}
-                </datalist>
+                <div style="position: relative; display: inline-block; width: 100%;">
+                    <input type="text" id="metro" name="metro" placeholder="Введите станцию метро..." autocomplete="off" style="width: 100%;">
+                    <ul id="metro-results" class="dropdown-menu" style="display: none;"></ul>
+                </div>
             </div>
             <div class="form-group">
                 <label for="street">Улица:</label>
-                <input type="text" id="street" name="street" value="{{ form.street.value }}" required>
+                <input type="text" id="street" name="street" value="{{ street }}">
             </div>
             <div class="form-group">
                 <label for="house_number">Номер дома:</label>
-                <input type="text" id="house_number" name="house_number" value="{{ form.house_number.value }}" required>
+                <input type="text" id="house_number" name="house_number" value="{{ house_number }}">
             </div>
             <div class="form-group">
                 <label for="entrance">Подъезд:</label>
-                <input type="text" id="entrance" name="entrance" value="{{ form.entrance.value }}">
+                <input type="text" id="entrance" name="entrance" value="{{ entrance }}">
             </div>
             <div class="form-group">
                 <label for="floor">Этаж:</label>
-                <input type="text" id="floor" name="floor" value="{{ form.floor.value }}">
+                <input type="text" id="floor" name="floor" value="{{ floor }}">
             </div>
             <div class="form-group">
                 <label for="intercom">Домофон:</label>
-                <input type="text" id="intercom" name="intercom" value="{{ form.intercom.value }}">
+                <input type="text" id="intercom" name="intercom" value="{{ intercom }}">
             </div>
             <div class="form-group">
                 <label for="phone">Телефон:</label>
-                <input type="text" id="phone" name="phone" value="{{ form.phone.value }}">
+                <input type="text" id="phone" name="phone" value="{{ phone }}" placeholder="+7 (XXX) XXX-XX-XX" oninput="formatPhoneNumber(this)" onfocus="addPrefix(this)" minlength="18">
             </div>
             <div class="form-group">
                 <label for="price_offline">Цена за работу оффлайн:</label>
-                <input type="number" id="price_offline" name="price_offline" value="{{ form.price_offline.value }}">
+                <input type="number" id="price_offline" name="price_offline" value="{{ price_offline }}" max="100000000">
             </div>
             <div class="form-group">
                 <label for="price_online">Цена за работу онлайн:</label>
-                <input type="number" id="price_online" name="price_online" value="{{ form.price_online.value|default_if_none:0 }}">
+                <input type="number" id="price_online" name="price_online" value="{{ price_online }}" max="100000000">
             </div>
             <button type="submit" class="submit-btn">Сохранить</button>
         </form>
@@ -82,10 +80,152 @@
             <a href="{% url 'clients' %}">Отмена</a>
         </div>
     </div>
-
     <footer class="footer">
         <p>© 2025 MyClient. Все права защищены.</p>
     </footer>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const phoneInput = document.getElementById('phone');
+
+        phoneInput.addEventListener('input', function () {
+            let value = phoneInput.value.replace(/\D/g, ''); // Убираем все нецифровые символы
+
+            // Ограничиваем длину до 11 символов
+            if (value.length > 11) {
+                value = value.substring(0, 11);
+
+            }
+
+            // Форматирование номера
+            if (value.length >= 0 && value.length < 4) {
+                sub = '+7 (' + value.substring(1, 4);
+            }
+            if (value.length >= 4 && value.length < 7) {
+                sub = '+7 (' + value.substring(1, 4) + ') ' + value.substring(4, 7);
+            }
+            if (value.length >= 7 && value.length < 10) {
+                sub = '+7 (' + value.substring(1, 4) + ') ' + value.substring(4, 7) + '-' + value.substring(7, 9);
+            }
+            if (value.length >= 10 && value.length <= 11) {
+                sub = '+7 (' + value.substring(1, 4) + ') ' + value.substring(4, 7) + '-' + value.substring(7, 9) + '-' + value.substring(9, 11);
+            }
+
+            formattedValue = sub.replace(/[\-\)\s]+$/, '');
+
+            phoneInput.value = formattedValue; // Применяем отформатированное значение
+        });
+
+        // Функция для добавления префикса при фокусе
+        function addPrefix(input) {
+            if (input.value === '') {
+                input.value = '+7 (';
+            }
+        }
+
+    });
+</script>
+<script>
+    const metroStations = {{ metro_stations|safe }}; // Передаём список станций метро из контекста
+
+    const metroInput = document.getElementById('metro');
+    const resultsContainer = document.getElementById('metro-results');
+
+    metroInput.addEventListener('input', function () {
+        const query = this.value.toLowerCase().trim();
+        resultsContainer.innerHTML = ''; // Очищаем предыдущие результаты
+
+        if (query) {
+            const filteredStations = metroStations.filter(station =>
+                station.toLowerCase().includes(query)
+            );
+
+            if (filteredStations.length > 0) {
+                filteredStations.forEach(station => {
+                    const li = document.createElement('li');
+                    li.textContent = station; // Добавляем только текст станции метро
+                    li.classList.add('list-group-item');
+
+                    li.addEventListener('click', () => {
+                        metroInput.value = station;
+                        resultsContainer.style.display = 'none';
+                    });
+
+                    resultsContainer.appendChild(li);
+                });
+                resultsContainer.style.display = 'block';
+            } else {
+                resultsContainer.style.display = 'none';
+            }
+        } else {
+            resultsContainer.style.display = 'none';
+        }
+    });
+
+    // Закрытие списка при клике за его пределами
+    document.addEventListener('click', function (e) {
+        if (!resultsContainer.contains(e.target) && e.target !== metroInput) {
+            resultsContainer.style.display = 'none';
+        }
+    });
+
+    // Предотвращаем мерцание при наведении на список
+    resultsContainer.addEventListener('mouseover', function () {
+        resultsContainer.style.display = 'block';
+    });
+</script>
+<script>
+    // Находим форму на странице
+    const form = document.querySelector('.form-container');
+
+    // Все поля ввода в форме
+    const inputs = form.querySelectorAll('input, textarea');
+
+    // Перехватываем нажатие клавиши Enter
+    form.addEventListener('keydown', function (event) {
+        // Проверяем, если клавиша Enter была нажата
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Отменяем стандартное поведение
+
+            // Ищем индекс текущего элемента
+            const currentIndex = Array.from(inputs).indexOf(document.activeElement);
+
+            // Если это не последний элемент, то переключаем фокус на следующий
+            if (currentIndex < inputs.length - 1) {
+                inputs[currentIndex + 1].focus();
+            }
+        }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const phoneInput = document.getElementById('phone');
+        const form = phoneInput.closest('form');  // Получаем родительскую форму
+        const errorMessage = document.createElement('div');
+        errorMessage.style.color = 'red';
+        errorMessage.id = 'phone-error';
+        phoneInput.parentElement.appendChild(errorMessage);
+
+        phoneInput.addEventListener('input', function () {
+            const value = phoneInput.value;
+            const hasNumber = /\d/.test(value);
+            // Проверяем, что телефон содержит 18 символов
+            if (phoneInput.value.length < 18) {
+                errorMessage.textContent = 'Телефон должен состоять из 11 цифр.';
+            } else {
+                errorMessage.textContent = '';  // Очищаем сообщение об ошибке
+            }
+        });
+
+        form.addEventListener('submit', function (event) {
+            const value = phoneInput.value;
+            const hasNumber = /\d/.test(value);
+            const isValidLength = value.length >= 18;
+
+            if (hasNumber|not isValidLength) {
+                event.preventDefault();  // Если ошибка, не отправляем форму
+            }
+        });
+    });
+</script>
 </body>
 </html>
-

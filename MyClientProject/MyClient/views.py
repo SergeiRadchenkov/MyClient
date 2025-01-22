@@ -11,6 +11,7 @@ from .forms import CustomUserChangeForm, ClientForm
 from django.contrib.auth import update_session_auth_hash
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+from django.core.paginator import Paginator
 
 
 @login_required
@@ -23,6 +24,7 @@ def schedule(request):
 def clients(request):
     search_query = request.GET.get('search', '').strip().lower()  # Удаляем лишние пробелы
     sort_by = request.GET.get('sort', '')
+    page_number = request.GET.get('page', 1)  # Номер текущей страницы, по умолчанию 1
 
     clients = Client.objects.all().order_by('-created_at')  # Новые клиенты сверху
     results = []
@@ -84,7 +86,11 @@ def clients(request):
         # Если сортировка не указана или указано неправильное поле, по умолчанию сортировка по created_at
         clients = clients.order_by('-created_at')
 
-    return render(request, 'MyClient/clients.html', {'clients': clients})
+    # Пагинация
+    paginator = Paginator(clients, 20)  # 20 клиентов на страницу
+    page_obj = paginator.get_page(page_number)  # Получаем текущую страницу
+
+    return render(request, 'MyClient/clients.html', {'page_obj': page_obj, 'clients': clients, 'search_query': search_query, 'sort_by': sort_by})
 
 
 def autocomplete(request):
@@ -101,7 +107,7 @@ def autocomplete(request):
             # Добавляем клиента в список
             clients.append({
                 'id': result.id,
-                'name': f'{result.first_name} {result.last_name}, метро {result.metro}, улица {result.street}'
+                'name': f'{result.first_name}{' ' + result.last_name if result.last_name != 'я' else ''}{', метро ' + result.metro if result.metro != 'я' else ''}{', улица ' + result.street if result.street != 'я' else ''}'
             })
 
     # Возвращаем результат в формате JSON
@@ -306,9 +312,38 @@ def add_client(request):
     if request.method == 'POST':
         form = ClientForm(request.POST)
         if form.is_valid():
-            form.save()
+            client = form.save(commit=False)
+            # Проверка длины телефона
+            phone = client.phone  # Предполагаем, что phone - это поле в модели
+
+            if phone and len(phone) != 18:  # Проверяем, что телефон имеет длину 18 (например, "+7 (XXX) XXX-XX-XX")
+                messages.error(request, 'Телефон должен быть в формате +7 (XXX) XXX-XX-XX')
+                return render(request, 'MyClient/add_client.html', {'form': form, 'metro_stations': metro_stations})
+            if not client.price_offline:
+                client.price_offline = 0
+            if not client.price_online:
+                client.price_online = 0
+            if not client.last_name:
+                client.last_name = 'я'
+            if not client.metro:
+                client.metro = 'я'
+            if not client.street:
+                client.street = 'я'
+            if not client.house_number:
+                client.house_number = 'я'
+            if not client.entrance:
+                client.entrance = 'я'
+            if not client.floor:
+                client.floor = 'я'
+            if not client.intercom:
+                client.intercom = 'я'
+            if not client.phone:
+                client.phone = 'я'
+            client.save()
             return redirect('clients')
         else:
+            for field in form:
+                print(field.errors)
             messages.error(request, 'Ошибка при добавлении клиента. Проверьте данные.')
     else:
         form = ClientForm()
