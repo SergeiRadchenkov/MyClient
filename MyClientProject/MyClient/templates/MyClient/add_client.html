@@ -63,7 +63,8 @@
             </div>
             <div class="form-group">
                 <label for="phone">Телефон:</label>
-                <input type="text" id="phone" name="phone" value="{{ phone }}" placeholder="+7 (XXX) XXX-XX-XX" oninput="formatPhoneNumber(this)" onfocus="addPrefix(this)" minlength="18">
+                <input type="text" id="phone" name="phone" value="{{ phone }}" placeholder="+7 (XXX) XXX-XX-XX" oninput="formatPhoneNumber(this)" onfocus="addPrefix(this)">
+                <div id="phone-error" style="color: red;"></div>
             </div>
             <div class="form-group">
                 <label for="price_offline">Цена за работу оффлайн:</label>
@@ -122,6 +123,12 @@
             }
         }
 
+        // Функция для удаления префикса, если поле пустое
+        phoneInput.addEventListener('blur', function () {
+            if (phoneInput.value === '+7 (') {
+                phoneInput.value = ''; // Убираем префикс, если пользователь ничего не ввёл
+            }
+        });
     });
 </script>
 <script>
@@ -205,12 +212,15 @@
         errorMessage.id = 'phone-error';
         phoneInput.parentElement.appendChild(errorMessage);
 
+        // Проверка, что в поле есть хотя бы одна цифра и длина не менее 18 символов
         phoneInput.addEventListener('input', function () {
             const value = phoneInput.value;
-            const hasNumber = /\d/.test(value);
-            // Проверяем, что телефон содержит 18 символов
-            if (phoneInput.value.length < 18) {
-                errorMessage.textContent = 'Телефон должен состоять из 11 цифр.';
+            const hasNumber = /\d/.test(value);  // Проверка на наличие хотя бы одной цифры
+            const isValidLength = value.length === 18 || value === '';  // Проверка длины
+
+            // Если нет цифры или длина меньше 18, показываем ошибк
+            if (!isValidLength) {
+                errorMessage.textContent = 'Введите 11 цифр.';
             } else {
                 errorMessage.textContent = '';  // Очищаем сообщение об ошибке
             }
@@ -218,11 +228,13 @@
 
         form.addEventListener('submit', function (event) {
             const value = phoneInput.value;
-            const hasNumber = /\d/.test(value);
-            const isValidLength = value.length >= 18;
+            const hasNumber = /\d/.test(value);  // Проверка на наличие хотя бы одной цифры
+            const isValidLength = value.length === 18 || value === '';  // Проверка длины
 
-            if (hasNumber|not isValidLength) {
-                event.preventDefault();  // Если ошибка, не отправляем форму
+            // Если нет цифры или длина меньше 18, предотвратить отправку формы
+            if (!isValidLength) {
+                errorMessage.textContent = 'Введите 11 цифр';
+                event.preventDefault();  // Предотвращаем отправку формы
             }
         });
     });

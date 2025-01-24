@@ -1,4 +1,4 @@
-<!-- MyClient/templates/MyClient/client_detail.html -->
+<!-- MyClient/templates/MyClient/edit_client.html -->
 
 {% extends 'base.html' %}
 {% block title %}{{ client.first_name }} {{ client.last_name }}{% endblock %}
@@ -15,7 +15,7 @@
         <i class="fa fa-arrow-left"></i> <!-- Иконка стрелочки назад -->
     </a>
 
-    <a href="{% url 'edit_client' client.id %}" class="settings-btn">
+    <a href="{% url 'settings' %}" class="settings-btn">
         <i class="fa fa-cogs"></i> <!-- Иконка шестерёнки -->
     </a>
 </div>

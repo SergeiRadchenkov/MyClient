@@ -45,7 +45,11 @@ def clients(request):
                         'house_number': client.house_number,
                         'entrance': client.entrance,
                         'floor': client.floor,
+                        'intercom': client.intercom
                     })
+            if len(results) > 20:
+                paginator = Paginator(results, 20)  # 20 клиентов на страницу
+                results = paginator.get_page(page_number)  # Получаем текущую страницу
         else:  # Если одно слово или больше двух
             for client in clients:
                 if any(term in client.first_name.lower() for term in search_terms) or \
@@ -59,10 +63,15 @@ def clients(request):
                         'metro': client.metro,
                         'street': client.street,
                         'house_number': client.house_number,
-                        'entrance' : client.entrance,
+                        'entrance': client.entrance,
                         'floor': client.floor,
+                        'intercom': client.intercom
                     })
-        return render(request, 'MyClient/clients.html', {'clients': results})
+            if len(results) > 20:
+                paginator = Paginator(results, 20)  # 20 клиентов на страницу
+                results = paginator.get_page(page_number)  # Получаем текущую страницу
+
+        return render(request, 'MyClient/clients.html', {'page_obj': results, 'clients': results, 'search_query': search_query, 'sort_by': sort_by})
 
 
     def get_key_func(field):
@@ -90,7 +99,7 @@ def clients(request):
     paginator = Paginator(clients, 20)  # 20 клиентов на страницу
     page_obj = paginator.get_page(page_number)  # Получаем текущую страницу
 
-    return render(request, 'MyClient/clients.html', {'page_obj': page_obj, 'clients': clients, 'search_query': search_query, 'sort_by': sort_by})
+    return render(request, 'MyClient/clients.html', {'page_obj': page_obj, 'clients': page_obj, 'search_query': search_query, 'sort_by': sort_by})
 
 
 def autocomplete(request):
@@ -107,7 +116,7 @@ def autocomplete(request):
             # Добавляем клиента в список
             clients.append({
                 'id': result.id,
-                'name': f'{result.first_name}{' ' + result.last_name if result.last_name != 'я' else ''}{', метро ' + result.metro if result.metro != 'я' else ''}{', улица ' + result.street if result.street != 'я' else ''}'
+                'name': f'{result.first_name}{' ' + result.last_name if result.last_name != 'яя' else ''}{', метро ' + result.metro if result.metro != 'яя' else ''}{', улица ' + result.street if result.street != 'яя' else ''}'
             })
 
     # Возвращаем результат в формате JSON
@@ -118,6 +127,12 @@ def autocomplete(request):
 def client_detail(request, client_id):
     client = get_object_or_404(Client, id=client_id)
     return render(request, 'MyClient/client_detail.html', {'client': client})
+
+
+@login_required
+def edit_client(request, client_id):
+    client = get_object_or_404(Client, id=client_id)
+    return render(request, 'MyClient/edit_client.html', {'client': client})
 
 
 @login_required
@@ -324,21 +339,21 @@ def add_client(request):
             if not client.price_online:
                 client.price_online = 0
             if not client.last_name:
-                client.last_name = 'я'
+                client.last_name = 'яя'
             if not client.metro:
-                client.metro = 'я'
+                client.metro = 'яя'
             if not client.street:
-                client.street = 'я'
+                client.street = 'яя'
             if not client.house_number:
-                client.house_number = 'я'
+                client.house_number = 'яя'
             if not client.entrance:
-                client.entrance = 'я'
+                client.entrance = 'яя'
             if not client.floor:
-                client.floor = 'я'
+                client.floor = 'яя'
             if not client.intercom:
-                client.intercom = 'я'
+                client.intercom = 'яя'
             if not client.phone:
-                client.phone = 'я'
+                client.phone = 'яя'
             client.save()
             return redirect('clients')
         else:

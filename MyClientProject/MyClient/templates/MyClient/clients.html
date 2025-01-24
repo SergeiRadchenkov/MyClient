@@ -41,14 +41,25 @@
 
     <!-- Список клиентов -->
     <div class="client-list">
-        {% for client in clients %}
-        <div class="client-card mb-3 p-3" style="background-color: {% cycle '#f9f9f9' '#e9ecef' %}; cursor: pointer;" onclick="location.href='{% url 'client_detail' client.id %}'">
-            <div><strong>{{ client.first_name }}{% if client.last_name != "я" %} {{ client.last_name }}{% endif %}</strong>{% if client.metro != "я" %}, метро {{ client.metro }}{% endif %}</div>
-            <div>{% if client.street != "я" %}улица {{ client.street }}, {% endif %}{% if client.house_number != "я" %}дом {{ client.house_number }}, {% endif %}{% if client.entrance != "я" %}подъезд {{ client.entrance }}, {% endif %}{% if client.floor != "я" %}этаж {{ client.floor }}, {% endif %}{% if client.intercom != "я" %}домофон {{ client.intercom }}{% endif %}</div>
-        </div>
-        {% empty %}
-        <p>Клиенты не найдены.</p>
-        {% endfor %}
+        {% if page_obj.object_list|length > 20 %}
+            {% for client in page_obj.object_list %}
+            <div class="client-card mb-3 p-3" style="background-color: {% cycle '#f9f9f9' '#e9ecef' %}; cursor: pointer;" onclick="location.href='{% url 'client_detail' client.id %}'">
+                <div><strong>{{ client.first_name }}{% if client.last_name != "яя" %} {{ client.last_name }}{% endif %}</strong>{% if client.metro != "яя" %}, метро {{ client.metro }}{% endif %}</div>
+                <div>{% if client.street != "яя" %}улица {{ client.street }}, {% endif %}{% if client.house_number != "яя" %}дом {{ client.house_number }}, {% endif %}{% if client.entrance != "яя" %}подъезд {{ client.entrance }}, {% endif %}{% if client.floor != "яя" %}этаж {{ client.floor }}, {% endif %}{% if client.intercom != "яя" %}домофон {{ client.intercom }}{% endif %}</div>
+            </div>
+            {% empty %}
+            <p>Клиенты не найдены.</p>
+            {% endfor %}
+        {% elif clients %}
+            {% for client in clients %}
+            <div class="client-card mb-3 p-3" style="background-color: {% cycle '#f9f9f9' '#e9ecef' %}; cursor: pointer;" onclick="location.href='{% url 'client_detail' client.id %}'">
+                <div><strong>{{ client.first_name }}{% if client.last_name != "яя" %} {{ client.last_name }}{% endif %}</strong>{% if client.metro != "яя" %}, метро {{ client.metro }}{% endif %}</div>
+                <div>{% if client.street != "яя" %}улица {{ client.street }}, {% endif %}{% if client.house_number != "яя" %}дом {{ client.house_number }}, {% endif %}{% if client.entrance != "яя" %}подъезд {{ client.entrance }}, {% endif %}{% if client.floor != "яя" %}этаж {{ client.floor }}, {% endif %}{% if client.intercom != "яя" %}домофон {{ client.intercom }}{% endif %}</div>
+            </div>
+            {% empty %}
+            <p>Клиенты не найдены.</p>
+            {% endfor %}
+        {% endif %}
     </div>
     <div class="pagination">
     <ul class="pagination">

@@ -20,4 +20,5 @@ urlpatterns = [
     path('clients/<int:client_id>/', views.client_detail, name='client_detail'),
     path('clients/', views.clients, name='clients'),
     path('autocomplete/', views.autocomplete, name='autocomplete'),
+    path('client/<int:client_id>/', views.edit_client, name='edit_client'),
 ]

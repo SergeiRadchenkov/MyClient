@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+    {% block extra_styles %}{% endblock %}
 </head>
 <body>
     <!-- Верхняя глянцевая полоса с эмблемой -->
@@ -39,7 +39,7 @@
 
 
     <!-- Основной контент -->
-    <main>
+    <main id="main-content">
         {% block content %}
         <!-- Здесь будет контент страницы -->
         {% endblock %}
@@ -85,7 +85,7 @@ document.getElementById('search').addEventListener('input', function() {
                         // Извлекаем только имя и фамилию из значения name
                         const fullName = client.name.split(' ');
                         const firstName = fullName[0].replace(',', '');  // Первая часть - имя
-                        const lastName = fullName.length > 1 ? fullName[1].slice(0, -1) : '';  // Вторая часть - фамилия (если есть)
+                        const lastName = fullName.length > 1 ? fullName[1].replace(',', '') : '';  // Вторая часть - фамилия (если есть)
 
                         // Прячем результаты
                         resultsContainer.style.display = 'none';
