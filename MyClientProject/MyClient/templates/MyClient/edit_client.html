@@ -1,29 +1,64 @@
 <!-- MyClient/templates/MyClient/edit_client.html -->
 
-{% extends 'base.html' %}
-{% block title %}{{ client.first_name }} {{ client.last_name }}{% endblock %}
+{% extends 'MyClient/add_client.html' %}
+
+{% block title %}Редактировать клиента{% endblock %}
+
 {% block content %}
-<div class="profile-client">
-    <h1>{{ client.first_name }}{% if client.last_name != "яя" %} {{ client.last_name }}{% endif %}</h1>
-    <p><strong>Метро:</strong>{% if client.metro != "яя" %} {{ client.metro }}{% endif %}</p>
-    <p><strong>Адрес:</strong>{% if client.street != "яя" %} улица {{ client.street }},{% endif %}{% if client.house_number != "яя" %} дом {{ client.house_number }},{% endif %}{% if client.entrance != "яя" %} подъезд {{ client.entrance }},{% endif %}{% if client.floor != "яя" %} этаж {{ client.floor }},{% endif %}{% if client.intercom != "яя" %} домофон {{ client.intercom }}{% endif %}</p>
-    <p><strong>Телефон:</strong>{% if client.phone != "яя" %} {{ client.phone }}{% endif %}</p>
-    <p><strong>Цена оффлайн:</strong>{% if client.price_offline != 0 %} {{ client.price_offline }}{% endif %}</p>
-    <p><strong>Цена онлайн:</strong>{% if client.price_online != 0 %} {{ client.price_online }}{% endif %}</p>
-
-    <a onclick="history.back()" class="back-btn">
-        <i class="fa fa-arrow-left"></i> <!-- Иконка стрелочки назад -->
-    </a>
-
-    <a href="{% url 'settings' %}" class="settings-btn">
-        <i class="fa fa-cogs"></i> <!-- Иконка шестерёнки -->
-    </a>
+<h1 class="auth-title">Редактировать клиента</h1>
+<form method="POST" class="form-container">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="first_name">Имя<span style="color: red;">*</span>:</label>
+        <input type="text" id="first_name" name="first_name" value="{{ form.first_name.value }}" required>
+    </div>
+    <div class="form-group">
+        <label for="last_name">Фамилия:</label>
+        <input type="text" id="last_name" name="last_name" value="{% if client.last_name != 'яя' %}{{ form.last_name.value }}{% endif %}">
+    </div>
+    <div class="form-group">
+        <label for="metro">Метро:</label>
+        <div style="position: relative; display: inline-block; width: 100%;">
+            <input type="text" id="metro" name="metro" value="{% if client.metro != 'яя' %}{{ form.metro.value }}{% endif %}" placeholder="Введите станцию метро..." autocomplete="off" style="width: 100%;">
+            <ul id="metro-results" class="dropdown-menu" style="display: none;"></ul>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="street">Улица:</label>
+        <input type="text" id="street" name="street" value="{% if client.street != 'яя' %}{{ form.street.value }}{% endif %}">
+    </div>
+    <div class="form-group">
+        <label for="house_number">Номер дома:</label>
+        <input type="text" id="house_number" name="house_number" value="{% if client.house_number != 'яя' %}{{ form.house_number.value }}{% endif %}">
+    </div>
+    <div class="form-group">
+        <label for="entrance">Подъезд:</label>
+        <input type="text" id="entrance" name="entrance" value="{% if client.entrance != 'яя' %}{{ form.entrance.value }}{% endif %}">
+    </div>
+    <div class="form-group">
+        <label for="floor">Этаж:</label>
+        <input type="text" id="floor" name="floor" value="{% if client.floor != 'яя' %}{{ form.floor.value }}{% endif %}">
+    </div>
+    <div class="form-group">
+        <label for="intercom">Домофон:</label>
+        <input type="text" id="intercom" name="intercom" value="{% if client.intercom != 'яя' %}{{ form.intercom.value }}{% endif %}">
+    </div>
+    <div class="form-group">
+        <label for="phone">Телефон:</label>
+        <input type="text" id="phone" name="phone" value="{% if client.phone != 'яя' %}{{ form.phone.value }}{% endif %}" placeholder="+7 (XXX) XXX-XX-XX" oninput="formatPhoneNumber(this)" onfocus="addPrefix(this)">
+        <div id="phone-error" style="color: red;"></div>
+    </div>
+    <div class="form-group">
+        <label for="price_offline">Цена за работу оффлайн:</label>
+        <input type="number" id="price_offline" name="price_offline" value="{% if client.price_offline != 0 %}{{ form.price_offline.value }}{% endif %}" max="100000000">
+    </div>
+    <div class="form-group">
+        <label for="price_online">Цена за работу онлайн:</label>
+        <input type="number" id="price_online" name="price_online" value="{% if client.price_online != 0 %}{{ form.price_online.value }}{% endif %}" max="100000000">
+    </div>
+    <button type="submit" class="submit-btn">Сохранить изменения</button>
+</form>
+<div class="extra-links">
+    <a href="{% url 'client_detail' client.id %}">Отмена</a>
 </div>
-{% endblock %}
-{% block extra_styles %}
-<style>
-    #main-content {
-        background: #03a9f4;
-    }
-</style>
 {% endblock %}

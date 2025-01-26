@@ -6,19 +6,134 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 import re
 from django.core.exceptions import ValidationError
-from .models import Profile, Client
+from .models import Profile, Client, Schedule
 from .forms import CustomUserChangeForm, ClientForm
 from django.contrib.auth import update_session_auth_hash
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.core.paginator import Paginator
+from datetime import date, timedelta, datetime
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 
 @login_required
 def schedule(request):
     if not request.user.is_authenticated:
         return redirect('auth')
-    return render(request, 'MyClient/schedule.html')
+
+    search_query = request.GET.get('search_client', '').strip().lower()
+    start_date_str = request.GET.get('start_date', date.today().strftime('%d-%m-%y'))  # Получаем дату в формате DD-MM-YY
+    # Преобразуем строку в объект `date`
+    start_date = datetime.strptime(start_date_str, '%d-%m-%y').date()
+
+    clients = Client.objects.all()  # Список всех клиентов
+    # Получение расписания
+    schedules = Schedule.objects.filter(date__gte=start_date)
+    results = []
+
+    if search_query:
+        schedules = schedules.filter(client__first_name__icontains=search_query)
+        # Разделяем запрос на слова (например, "Иван Иванов")
+        search_terms = search_query.split()
+        if len(search_terms) == 2:  # Если два слова (имя и фамилия)
+            first_name, last_name = search_terms
+            for client in clients:
+                if first_name in client.first_name.lower() and last_name in client.last_name.lower():
+                    results.append({
+                        'id': client.id,
+                        'first_name': client.first_name,
+                        'last_name': client.last_name,
+                        'metro': client.metro,
+                        'street': client.street,
+                        'house_number': client.house_number,
+                        'entrance': client.entrance,
+                        'floor': client.floor,
+                        'intercom': client.intercom
+                    })
+        else:  # Если одно слово или больше двух
+            for client in clients:
+                if any(term in client.first_name.lower() for term in search_terms) or \
+                        any(term in client.last_name.lower() for term in search_terms) or \
+                        any(term in client.metro.lower() for term in search_terms) or \
+                        any(term in client.street.lower() for term in search_terms):
+                    results.append({
+                        'id': client.id,
+                        'first_name': client.first_name,
+                        'last_name': client.last_name,
+                        'metro': client.metro,
+                        'street': client.street,
+                        'house_number': client.house_number,
+                        'entrance': client.entrance,
+                        'floor': client.floor,
+                        'intercom': client.intercom
+                    })
+            return render(request, 'MyClient/clients.html',
+                          {'clients': results, 'search_query': search_query})
+
+
+    # Группировка по датам
+    schedule_data = {}
+    totals = {}
+    start_date = date.today()
+
+    for i in range(7):  # Показывать неделю
+        day = start_date + timedelta(days=i)
+        daily_schedules = schedules.filter(date=day)
+        schedule_data[day] = daily_schedules
+        totals[day] = {
+            'plan': float(sum(s.cost for s in daily_schedules if not s.is_completed)),
+            'due': float(sum(s.cost for s in daily_schedules if s.is_completed and not s.is_paid)),
+            'paid': float(sum(s.cost for s in daily_schedules if s.is_paid)),
+        }
+
+    return render(request, 'MyClient/schedule.html', {
+        'schedule_data': schedule_data,
+        'totals': totals,
+        'start_date': start_date or date.today(),
+        'today': date.today(),  # Добавление переменной `today`
+        'clients': clients,
+        'search_query': search_query,
+    })
+
+
+@login_required
+@csrf_exempt
+def add_schedule(request):
+    if request.method == 'POST':
+        try:
+            client_id = request.POST.get('client_id')
+            date = request.POST.get('schedule_date')
+            hour = request.POST.get('schedule_hour')
+            minute = request.POST.get('schedule_minute')
+            is_online = request.POST.get('is_online') == 'true'  # Преобразование строки в булево значение
+            cost = request.POST.get('schedule_cost')
+
+            # Проверка наличия клиента
+            client = Client.objects.get(id=client_id)
+
+            # Форматирование времени
+            time = datetime.strptime(f"{hour}:{minute}", "%H:%M").time()
+
+            # Создание объекта расписания
+            Schedule.objects.create(
+                client=client,
+                date=date,
+                time=time,
+                is_online=is_online,
+                cost=cost
+            )
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+
+def get_client_cost(request, client_id):
+    client = get_object_or_404(Client, id=client_id)
+    return JsonResponse({"price_online": client.price_online, "price_offline": client.price_offline})
+
 
 @login_required
 def clients(request):
@@ -126,13 +241,13 @@ def autocomplete(request):
 @login_required
 def client_detail(request, client_id):
     client = get_object_or_404(Client, id=client_id)
-    return render(request, 'MyClient/client_detail.html', {'client': client})
+    return render(request, 'MyClient/client_detail.html', {'client': client, 'show_settings_btn': True})
 
 
 @login_required
-def edit_client(request, client_id):
+def client_settings(request, client_id):
     client = get_object_or_404(Client, id=client_id)
-    return render(request, 'MyClient/edit_client.html', {'client': client})
+    return render(request, 'MyClient/client_settings.html', {'client': client})
 
 
 @login_required
@@ -328,9 +443,9 @@ def add_client(request):
         form = ClientForm(request.POST)
         if form.is_valid():
             client = form.save(commit=False)
-            # Проверка длины телефона
-            phone = client.phone  # Предполагаем, что phone - это поле в модели
 
+            # Проверка длины телефона
+            phone = client.phone
             if phone and len(phone) != 18:  # Проверяем, что телефон имеет длину 18 (например, "+7 (XXX) XXX-XX-XX")
                 messages.error(request, 'Телефон должен быть в формате +7 (XXX) XXX-XX-XX')
                 return render(request, 'MyClient/add_client.html', {'form': form, 'metro_stations': metro_stations})
@@ -376,3 +491,65 @@ def quicksort(arr, key_func, reverse=False):
         return quicksort(greater, key_func, reverse) + [pivot] + quicksort(less, key_func, reverse)
     else:
         return quicksort(less, key_func, reverse) + [pivot] + quicksort(greater, key_func, reverse)
+
+
+def edit_client(request, client_id):
+
+    client = get_object_or_404(Client, id=client_id)
+
+    # Чтение станций метро из файла
+    metro_stations = []
+    try:
+        # Открытие файла и чтение станций метро
+        with open('metro_stations.txt', 'r', encoding='utf-8') as f:
+            metro_stations = [line.strip() for line in f.readlines()]
+    except FileNotFoundError:
+        # В случае если файл не найден
+        messages.error(request, 'Файл с метростанциями не найден.')
+
+    if request.method == 'POST':
+        form = ClientForm(request.POST, instance=client)
+        if form.is_valid():
+            client = form.save(commit=False)
+
+            # Проверка длины телефона
+            phone = client.phone
+            if phone and len(phone) != 18:  # Проверяем, что телефон имеет длину 18 (например, "+7 (XXX) XXX-XX-XX")
+                messages.error(request, 'Телефон должен быть в формате +7 (XXX) XXX-XX-XX')
+                return render(request, 'MyClient/add_client.html', {'form': form, 'metro_stations': metro_stations})
+            if not client.price_offline:
+                client.price_offline = 0
+            if not client.price_online:
+                client.price_online = 0
+            if not client.last_name:
+                client.last_name = 'яя'
+            if not client.metro:
+                client.metro = 'яя'
+            if not client.street:
+                client.street = 'яя'
+            if not client.house_number:
+                client.house_number = 'яя'
+            if not client.entrance:
+                client.entrance = 'яя'
+            if not client.floor:
+                client.floor = 'яя'
+            if not client.intercom:
+                client.intercom = 'яя'
+            if not client.phone:
+                client.phone = 'яя'
+            client.save()
+            return redirect('clients')
+        else:
+            messages.error(request, 'Ошибка при добавлении клиента. Проверьте данные.')
+    else:
+        form = ClientForm(instance=client)
+    return render(request, 'MyClient/edit_client.html',
+                  {'form': form, 'client': client, 'metro_stations': metro_stations})
+
+
+def delete_client(request, client_id):
+    client = get_object_or_404(Client, id=client_id)
+    if request.method == 'POST':
+        client.delete()
+        return redirect('clients')  # Возврат на страницу списка клиентов
+    return redirect('client_detail', id=client_id)

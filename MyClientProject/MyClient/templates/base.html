@@ -54,15 +54,15 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
 
 <script>
-document.getElementById('search').addEventListener('input', function() {
-    const query = this.value;
-    const resultsContainer = document.getElementById('search-results');
+    document.getElementById('search').addEventListener('input', function() {
+        const query = this.value;
+        const resultsContainer = document.getElementById('search-results');
 
-    // Если поле пустое, скрываем результаты
-    if (!query) {
-        resultsContainer.style.display = 'none';
-        return;
-    }
+        // Если поле пустое, скрываем результаты
+        if (!query) {
+            resultsContainer.style.display = 'none';
+            return;
+        }
 
     // Отправляем запрос на сервер для получения результатов автозаполнения
     fetch(`/autocomplete/?query=${query}`)
@@ -115,6 +115,151 @@ document.getElementById('search').addEventListener('input', function() {
     document.querySelector('select[name="sort"]').addEventListener('change', function () {
         this.form.submit(); // Отправляем форму при изменении значения в списке
     });
+</script>
+<script>
+    document.getElementById('search_client').addEventListener('input', function() {
+        const query = this.value;
+        const resultsContainer = document.getElementById('search-res');
+
+         // Если поле пустое, скрываем результаты
+        if (!query) {
+            resultsContainer.style.display = 'none';
+            return;
+        }
+
+        // Отправляем запрос на сервер для получения результатов автозаполнения
+        fetch(`/autocomplete/?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                resultsContainer.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(client => {
+                        const li = document.createElement('li');
+                        li.classList.add('list-group-item');
+                        li.textContent = client.name;
+
+                        li.addEventListener('click', () => {
+                            // Устанавливаем выбранное имя клиента в поле поиска
+                            document.getElementById('search_client').value = client.name;
+
+                            // Прячем список результатов
+                            resultsContainer.style.display = 'none';
+
+                            // Устанавливаем ID клиента в скрытое поле формы
+                            if (!document.getElementById('clientId')) {
+                                const hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name = 'client_id';
+                                hiddenInput.id = 'clientId';
+                                document.getElementById('addScheduleForm').appendChild(hiddenInput);
+                            }
+                            document.getElementById('clientId').value = client.id;
+
+                            // Загружаем стоимость клиента
+                            fetch(`/get_client_cost/${client.id}/`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    const isOnline = document.getElementById("is_online").checked;
+                                    document.getElementById('schedule_cost').value = isOnline ? data.price_online : data.price_offline;
+                                });
+                        });
+                        resultsContainer.appendChild(li);
+                    });
+                    resultsContainer.style.display = 'block';
+                } else {
+                    resultsContainer.style.display = 'none';
+                }
+            });
+    });
+
+    // Слушатель для изменения онлайн/оффлайн и пересчета стоимости
+    document.getElementById("is_online").addEventListener("change", function() {
+        const clientId = document.getElementById('clientId')?.value;
+
+        if (clientId) {
+            fetch(`/get_client_cost/${clientId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    saveJSONToFile(li, "response.json"); // Сохраняем JSON в файл
+                    const isOnline = document.getElementById("is_online").checked;
+                    document.getElementById('schedule_cost').value = isOnline ? data.price_online : data.price_offline;
+                });
+        }
+    });
+
+    // Отправка формы через AJAX
+    document.getElementById("addScheduleForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const isOnline = document.getElementById("is_online").checked;
+        const scheduleCost = document.getElementById("schedule_cost").value;
+
+
+        formData.append("is_online", isOnline);
+        formData.append("schedule_cost", scheduleCost);
+
+        fetch("{% url 'add_schedule' %}", {
+            method: "POST",
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Расписание добавлено!");
+                    window.location.reload();
+                } else {
+                    alert(data.error);
+                    alert("Ошибка при добавлении расписания.");
+                }
+            })
+            .catch(error => {
+                alert("Произошла ошибка. Попробуйте еще раз.");
+                console.error("Ошибка:", error);
+            });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const addScheduleModal = document.getElementById('addScheduleModal');
+        const addScheduleForm = document.getElementById('addScheduleForm');
+
+        // Событие сброса формы при закрытии модального окна
+        addScheduleModal.addEventListener('hidden.bs.modal', function () {
+            addScheduleForm.reset();
+
+            // Очистка результатов поиска
+            const searchResults = document.getElementById('search-res');
+            searchResults.innerHTML = '';
+            searchResults.style.display = 'none';
+        });
+    });
+
+    // Функция для ограничения ввода до 2 цифр
+    function limitInputToTwoDigits(event) {
+        const value = event.target.value;
+        if (value.length > 2) {
+            event.target.value = value.slice(0, 2); // Ограничение длины до 2 символов
+        }
+    }
+
+    // Получаем элементы
+    const hourInput = document.getElementById('scheduleHour');
+    const minuteInput = document.getElementById('scheduleMinute');
+
+    // Добавляем обработчик событий для каждого поля
+    hourInput.addEventListener('input', limitInputToTwoDigits);
+    minuteInput.addEventListener('input', limitInputToTwoDigits);
+    document.addEventListener('DOMContentLoaded', function() {
+
+});
+</script>
+<script>
+    function saveJSONToFile(jsonData, fileName) {
+        const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: "application/json" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+    }
 </script>
 </body>
 </html>

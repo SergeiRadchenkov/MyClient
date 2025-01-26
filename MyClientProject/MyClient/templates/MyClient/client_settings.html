@@ -1,0 +1,15 @@
+<!-- MyClient/templates/MyClient/client_settings.html -->
+
+{% extends 'MyClient/client_detail.html' %}
+
+{% block title %}Настройки клиента{% endblock %}
+
+{% block extra_content %}
+<div class="settings-buttons">
+    <a href="{% url 'edit_client' client.id %}" class="btn btn-primary">Редактировать</a>
+    <!-- Кнопка для открытия модального окна удаления профиля -->
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+        Удалить клиента
+    </button>
+</div>
+{% endblock %}

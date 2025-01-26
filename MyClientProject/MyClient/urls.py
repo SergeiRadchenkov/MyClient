@@ -20,5 +20,9 @@ urlpatterns = [
     path('clients/<int:client_id>/', views.client_detail, name='client_detail'),
     path('clients/', views.clients, name='clients'),
     path('autocomplete/', views.autocomplete, name='autocomplete'),
-    path('client/<int:client_id>/', views.edit_client, name='edit_client'),
+    path('client/<int:client_id>/', views.client_settings, name='client_settings'),
+    path('clients/<int:client_id>/edit/', views.edit_client, name='edit_client'),
+    path('clients/<int:client_id>/delete/', views.delete_client, name='delete_client'),
+    path('add_schedule/', views.add_schedule, name='add_schedule'),
+    path('get_client_cost/<int:client_id>/', views.get_client_cost, name='get_client_cost'),
 ]

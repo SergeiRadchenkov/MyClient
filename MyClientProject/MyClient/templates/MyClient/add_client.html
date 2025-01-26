@@ -14,6 +14,7 @@
         <a href="{% url 'schedule' %}">
             <img src="{% static 'images/logo.png' %}" alt="Логотип" class="logo">
         </a>
+        {% block content %}
         <h1 class="auth-title">Добавить клиента</h1>
 
         {% if messages %}
@@ -74,12 +75,13 @@
                 <label for="price_online">Цена за работу онлайн:</label>
                 <input type="number" id="price_online" name="price_online" value="{{ price_online }}" max="100000000">
             </div>
+
             <button type="submit" class="submit-btn">Сохранить</button>
         </form>
-
         <div class="extra-links">
             <a href="{% url 'clients' %}">Отмена</a>
         </div>
+        {% endblock %}
     </div>
     <footer class="footer">
         <p>© 2025 MyClient. Все права защищены.</p>
@@ -216,7 +218,7 @@
         phoneInput.addEventListener('input', function () {
             const value = phoneInput.value;
             const hasNumber = /\d/.test(value);  // Проверка на наличие хотя бы одной цифры
-            const isValidLength = value.length === 18 || value === '';  // Проверка длины
+            const isValidLength = value.length === 18 || value === '' || value.length === 4;  // Проверка длины
 
             // Если нет цифры или длина меньше 18, показываем ошибк
             if (!isValidLength) {

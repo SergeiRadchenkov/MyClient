@@ -3,6 +3,30 @@
 {% extends 'base.html' %}
 {% block title %}{{ client.first_name }} {{ client.last_name }}{% endblock %}
 {% block content %}
+
+<!-- Модальное окно -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content custom-modal-content"> <!-- Добавлен класс для стилизации -->
+            <div class="modal-header custom-modal-header"> <!-- Добавлен класс для стилизации -->
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить клиента?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Нет</button>
+                <!-- Форма для отправки запроса на удаление профиля -->
+                <form method="post" action="{% url 'delete_client' client.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Да</button> <!-- Кнопка "Да" стилизована как btn-primary -->
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="profile-client">
     <h1>{{ client.first_name }}{% if client.last_name != "яя" %} {{ client.last_name }}{% endif %}</h1>
     <p><strong>Метро:</strong>{% if client.metro != "яя" %} {{ client.metro }}{% endif %}</p>
@@ -10,14 +34,21 @@
     <p><strong>Телефон:</strong>{% if client.phone != "яя" %} {{ client.phone }}{% endif %}</p>
     <p><strong>Цена оффлайн:</strong>{% if client.price_offline != 0 %} {{ client.price_offline }}{% endif %}</p>
     <p><strong>Цена онлайн:</strong>{% if client.price_online != 0 %} {{ client.price_online }}{% endif %}</p>
+    <div class="client-settings">
+        <a onclick="history.back()" class="back-btn">
+            <i class="fa fa-arrow-left"></i> <!-- Иконка стрелочки назад -->
+        </a>
+        {% block extra_content %}
+        {% endblock %}
+    </div>
+    {% if show_settings_btn %}
+        <a href="{% url 'client_settings' client.id %}" class="settings-btn">
+            <i class="fa fa-cogs"></i> <!-- Иконка шестерёнки -->
+        </a>
 
-    <a onclick="history.back()" class="back-btn">
-        <i class="fa fa-arrow-left"></i> <!-- Иконка стрелочки назад -->
-    </a>
 
-    <a href="{% url 'edit_client' client.id %}" class="settings-btn">
-        <i class="fa fa-cogs"></i> <!-- Иконка шестерёнки -->
-    </a>
+    {% endif %}
+
 </div>
 {% endblock %}
 {% block extra_styles %}

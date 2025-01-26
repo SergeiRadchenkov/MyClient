@@ -23,10 +23,9 @@ class Client(models.Model):
     class Meta:
         ordering = ['-created_at']  # Новые клиенты сверху
 
-
-
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
 
 class Schedule(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='schedules')
@@ -34,7 +33,9 @@ class Schedule(models.Model):
     time = models.TimeField("Время")
     is_online = models.BooleanField("Онлайн", default=False)
     is_completed = models.BooleanField("Выполнено", default=False)
+    is_paid = models.BooleanField("Оплачено", default=False)
     cost = models.DecimalField("Стоимость", max_digits=10, decimal_places=2)
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile', unique=True)
@@ -45,10 +46,12 @@ class Profile(models.Model):
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} ({self.specialization})"
 
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
+
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
