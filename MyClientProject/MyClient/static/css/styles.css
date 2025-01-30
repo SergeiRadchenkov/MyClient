@@ -617,9 +617,9 @@ input[type="number"] {
 
 .schedule-day {
     border: 1px solid #ddd;
-    padding: 1rem;
+    padding: 10px;
     border-radius: 5px;
-    background-color: #f8f9fa;
+    background-color: #e0f7fa;
 }
 
 #search-res {
@@ -628,4 +628,25 @@ input[type="number"] {
     background-color: white;
     border: 1px solid #ccc;
     border-top: none;
+}
+
+.schedule-one {
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #e9ecef;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Легкая тень */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Плавный переход */
+    position: relative;
+    cursor: pointer;
+}
+
+/* Эффект при наведении на блок с информацией */
+.schedule-one:hover {
+    transform: scale(1.02); /* Легкое увеличение */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Увеличенная тень */
+}
+
+.schedule-day .totals {
+    font-size: 16px; /* Размер шрифта */
 }

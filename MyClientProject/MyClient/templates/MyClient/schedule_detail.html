@@ -1,0 +1,128 @@
+<!-- MyClient/templates/MyClient/schedule_detail.html -->
+
+{% extends 'base.html' %}
+{% block title %}Детали встречи{% endblock %}
+{% block content %}
+
+<!-- Модальное окно -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content custom-modal-content"> <!-- Добавлен класс для стилизации -->
+            <div class="modal-header custom-modal-header"> <!-- Добавлен класс для стилизации -->
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить встречу?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Нет</button>
+                <!-- Форма для отправки запроса на удаление профиля -->
+                <form method="post" action="{% url 'delete_schedule' schedule.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="profile-client">
+    <h2>Информация о встрече с {{ client.first_name }}{% if client.last_name != "яя" %} {{ client.last_name }}{% endif %}</h2>
+    {% if client.metro != "яя" %}<p><strong>Метро:</strong> {{ client.metro }}</p>{% endif %}
+    {% if client.street != "яя" %}<p><strong>Адрес:</strong> улица {{ client.street }},{% if client.house_number != "яя" %} дом {{ client.house_number }},{% endif %}{% if client.entrance != "яя" %} подъезд {{ client.entrance }},{% endif %}{% if client.floor != "яя" %} этаж {{ client.floor }},{% endif %}{% if client.intercom != "яя" %} домофон {{ client.intercom }}{% endif %}</p>{% endif %}
+    {% if client.phone != "яя" %}<p><strong>Телефон:</strong> {{ client.phone }}</p>{% endif %}
+    {% if client.price_offline != 0 %}<p><strong>Цена оффлайн:</strong> {{ client.price_offline }}</p>{% endif %}
+    {% if client.price_online != 0 %}<p><strong>Цена онлайн:</strong> {{ client.price_online }}</p>{% endif %}
+    <div style="box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15); border-radius: 10px; padding: 0 20px 0 20px; margin-bottom: 15px;">
+        <div class="client-settings">
+            <p><strong>Дата:</strong> {{ schedule.date|date:"d.m.Y" }} {{ schedule.date|date:"l" }}</p>
+            <p><strong>Время:</strong> {{ schedule.time|date:"H:i" }}</p>
+            <p><strong>Формат:</strong> {% if schedule.is_online %} Онлайн {% else %} Офлайн {% endif %}</p>
+            <p><strong>Стоимость:</strong> {{ schedule.cost }} руб.</p>
+        </div>
+    </div>
+    <div class="client-settings">
+        <a onclick="history.back()" class="back-btn">
+            <i class="fa fa-arrow-left"></i> <!-- Иконка стрелочки назад -->
+        </a>
+        <div class="settings-buttons">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editScheduleModal">
+                Редактировать
+            </button>
+            <!-- Кнопка для открытия модального окна удаления профиля -->
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+                Удалить встречу
+            </button>
+        </div>
+        {% block extra_content %}
+        {% endblock %}
+    </div>
+</div>
+
+<!-- Модальное окно редактирования встречи -->
+<div class="modal fade" id="editScheduleModal" tabindex="-1" aria-labelledby="editScheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content custom-modal-content">
+            <div class="modal-header custom-modal-header">
+                <h5 class="modal-title" id="editScheduleModalLabel">Редактировать встречу</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editScheduleForm" method="post" action="{% url 'edit_schedule' schedule.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="search_client" class="form-label">Клиент</label>
+                        <div style="position: relative;">
+                            <input type="text" name="search_client" id="search_client" class="form-control"
+                                   placeholder="Поиск клиента" value="{{ request.GET.search|default:schedule.client }}" required>
+                            <ul id="search-res" class="list-group"></ul>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_schedule_cost" class="form-label">Стоимость</label>
+                        <input type="number" id="edit_schedule_cost" name="schedule_cost" class="form-control"
+                               value="{{ schedule.cost }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_is_online" class="form-label">Онлайн</label>
+                        <input type="checkbox" id="edit_is_online" name="is_online" class="form-check-input"
+                               {% if schedule.is_online %}checked{% endif %}>
+                    </div>
+                    <div class="mb-3 d-flex justify-content-between">
+                        <div style="flex: 1;">
+                            <label for="edit_schedule_date" class="form-label">Дата</label>
+                            <input type="date" name="schedule_date" id="edit_schedule_date" class="form-control"
+                                   value="{{ schedule.date|date:'Y-m-d' }}" required>
+                        </div>
+                        <div style="flex: 1;">
+                            <label class="form-label">Время</label>
+                            <div class="d-flex align-items-center">
+                                <input type="number" name="schedule_hour" id="edit_schedule_hour"
+                                       class="form-control me-1" style="width: 60px;" min="0" max="23"
+                                       value="{{ schedule.time|date:'H' }}" required>
+                                <span>:</span>
+                                <input type="number" name="schedule_minute" id="edit_schedule_minute"
+                                       class="form-control ms-1" style="width: 60px;" min="0" max="59"
+                                       value="{{ schedule.time|date:'i' }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block extra_styles %}
+<style>
+    #main-content {
+        background: #03a9f4;
+    }
+</style>
+{% endblock %}

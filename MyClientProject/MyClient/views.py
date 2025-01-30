@@ -14,7 +14,6 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 from datetime import date, timedelta, datetime
 from django.views.decorators.csrf import csrf_exempt
-import json
 
 
 @login_required
@@ -23,15 +22,18 @@ def schedule(request):
         return redirect('auth')
 
     search_query = request.GET.get('search_client', '').strip().lower()
-    start_date_str = request.GET.get('start_date', date.today().strftime('%d-%m-%y'))  # Получаем дату в формате DD-MM-YY
-    # Преобразуем строку в объект `date`
-    start_date = datetime.strptime(start_date_str, '%d-%m-%y').date()
+    start_date_str = request.GET.get('start_date', date.today().strftime('%Y-%m-%d'))
+    start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
 
     clients = Client.objects.all()  # Список всех клиентов
+
+    # Определяем диапазон отображаемых дат (9 дней начиная с `start_date`)
+    date_range = [start_date + timedelta(days=i) for i in range(9)]
+
     # Получение расписания
     schedules = Schedule.objects.filter(date__gte=start_date)
-    results = []
 
+    results = []
     if search_query:
         schedules = schedules.filter(client__first_name__icontains=search_query)
         # Разделяем запрос на слова (например, "Иван Иванов")
@@ -73,24 +75,21 @@ def schedule(request):
 
 
     # Группировка по датам
-    schedule_data = {}
-    totals = {}
-    start_date = date.today()
+    schedule_data = {day: [] for day in date_range}
+    totals = {day: {'plan': 0, 'due': 0, 'paid': 0} for day in date_range}
 
-    for i in range(7):  # Показывать неделю
-        day = start_date + timedelta(days=i)
-        daily_schedules = schedules.filter(date=day)
-        schedule_data[day] = daily_schedules
-        totals[day] = {
-            'plan': float(sum(s.cost for s in daily_schedules if not s.is_completed)),
-            'due': float(sum(s.cost for s in daily_schedules if s.is_completed and not s.is_paid)),
-            'paid': float(sum(s.cost for s in daily_schedules if s.is_paid)),
-        }
+    for schedule in schedules:
+        day = schedule.date
+        if day in schedule_data:
+            schedule_data[day].append(schedule)
+            totals[day]['plan'] += float(schedule.cost if not schedule.is_completed else 0)
+            totals[day]['due'] += float(schedule.cost if schedule.is_completed and not schedule.is_paid else 0)
+            totals[day]['paid'] += float(schedule.cost if schedule.is_paid else 0)
 
     return render(request, 'MyClient/schedule.html', {
         'schedule_data': schedule_data,
         'totals': totals,
-        'start_date': start_date or date.today(),
+        'start_date': start_date,
         'today': date.today(),  # Добавление переменной `today`
         'clients': clients,
         'search_query': search_query,
@@ -128,6 +127,46 @@ def add_schedule(request):
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+
+@login_required
+@csrf_exempt
+def edit_schedule(request, schedule_id):
+    schedule = get_object_or_404(Schedule, id=schedule_id)
+
+    if request.method == "POST":
+        try:
+            # Получаем client_id из формы
+            client_id = request.POST.get('client_id')
+            schedule.client = Client.objects.get(id=client_id)
+        except Client.DoesNotExist:
+            messages.error(request, "Выбранный клиент не существует.")
+            return redirect('schedule_detail', schedule_id=schedule.id)
+
+        # Обновляем другие поля расписания
+        schedule.date = request.POST.get('schedule_date')
+        hour = int(request.POST.get('schedule_hour'))
+        minute = int(request.POST.get('schedule_minute'))
+        schedule.cost = request.POST.get('schedule_cost')
+        schedule.is_online = 'is_online' in request.POST
+
+        # Формируем время
+        schedule.time = f"{hour:02}:{minute:02}"
+
+        schedule.save()
+        messages.success(request, "Встреча успешно обновлена.")
+        return redirect('schedule_detail', schedule_id=schedule.id)
+
+    return redirect('schedule_detail', schedule_id=schedule.id)
+
+
+def schedule_detail(request, schedule_id):
+    schedule = get_object_or_404(Schedule, id=schedule_id)
+    context = {
+        'schedule': schedule,
+        'client': schedule.client,
+    }
+    return render(request, 'MyClient/schedule_detail.html', context)
 
 
 def get_client_cost(request, client_id):
@@ -553,3 +592,11 @@ def delete_client(request, client_id):
         client.delete()
         return redirect('clients')  # Возврат на страницу списка клиентов
     return redirect('client_detail', id=client_id)
+
+
+def delete_schedule(request, schedule_id):
+    schedule = get_object_or_404(Schedule, id=schedule_id)
+    if request.method == "POST":
+        schedule.delete()
+        return redirect('schedule')  # Замените на нужную страницу
+    return redirect('schedule_detail', schedule_id=schedule_id)

@@ -13,16 +13,19 @@
             <div class="search1">
                 <input type="text" name="search" id="search" class="form-control" placeholder="Поиск клиента" value="{{ request.GET.search }}">
                 <ul id="search-results" class="list-group"></ul>
-                <button type="submit" class="btn" style="background-color: #0288d1; color: white; border: none; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;">
+                <button type="submit" class="btn" style="background-color: #0288d1; color: white; border: none;
+                width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;">
                     <i class="fas fa-search"></i>  <!-- Иконка лупы -->
                 </button>
             </div>
             <div>
-                <input type="date" name="start_date" class="form-select" value="{{ start_date|default:today }}">
+                <input type="date" name="start_date" class="form-select" value="{{ start_date|date:'Y-m-d' }}">
             </div>
             <div>
                 <!-- Кнопка для открытия модального окна -->
-                <a href="#addScheduleModal" class="btn" data-bs-toggle="modal" data-bs-target="#addScheduleModal" style="background-color: #0288d1; color: white; border: none; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;">
+                <a href="#addScheduleModal" class="btn" data-bs-toggle="modal" data-bs-target="#addScheduleModal"
+                   style="background-color: #0288d1; color: white; border: none; width: 40px; height: 40px; display: flex;
+                   justify-content: center; align-items: center;">
                     <i class="fas fa-plus" style="font-size: 20px;"></i> <!-- Иконка плюса, можно настроить размер -->
                 </a>
             </div>
@@ -34,37 +37,44 @@
 <div class="schedule-grid">
     {% for date, schedules in schedule_data.items %}
     <div class="schedule-day">
-        <h4>{{ date|date:"d.m.Y" }}</h4>
-        <ul class="list-group">
-            {% for schedule in schedules %}
-            <li class="list-group-item">
-                <strong>{{ schedule.client.first_name }} {{ schedule.client.last_name }}</strong>
-                <br>Время: {{ schedule.time|date:"H:i" }}
-                {% if schedule.is_online %}
-                <span class="badge bg-danger">Online</span>
-                {% endif %}
-                <br>Стоимость: {{ schedule.cost }}
-                <div class="mt-2">
-                    <button class="btn btn-sm btn-outline-success {% if schedule.is_completed %}active{% endif %}"
-                            {% if schedule.is_completed %}disabled{% endif %}>
-                        Выполнено
-                    </button>
-                    <button class="btn btn-sm btn-outline-primary {% if schedule.is_paid %}active{% endif %}"
-                            {% if not schedule.is_completed or schedule.is_paid %}disabled{% endif %}>
-                        Оплачено
-                    </button>
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
-        <div class="totals mt-2">
-            <p>План выплат: {{ total.plan }}</p>
-            <p>К оплате: {{ total.due }}</p>
-            <p>Выплачено: {{ total.paid }}</p>
+        <div class="date-and-icon" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px">
+            <div>{{ date|date:"d.m.y" }} {{ date|date:"l" }}</div>
+            <a href="#addScheduleModal" class="btn" data-bs-toggle="modal" data-bs-target="#addScheduleModal"
+               style="background-color: #0288d1; color: white; border: none; width: 30px; height: 30px; display: flex;
+               justify-content: center; align-items: center; border-radius: 50px;" data-date="{{ date|date:'Y-m-d' }}">
+                <i class="fas fa-plus" style="font-size: 15px;"></i> <!-- Иконка плюса, можно настроить размер -->
+            </a>
         </div>
+            {% if schedules %}
+                {% for schedule in schedules %}
+                <div class="schedule-one" onclick="location.href='{% url 'schedule_detail' schedule.id %}'">
+                    <strong>{{ schedule.client.first_name }}{% if schedule.client.last_name != "яя" %} {{ schedule.client.last_name }}{% endif %}</strong>
+                    <br>Время: {{ schedule.time|date:"H:i" }}
+                    {% if schedule.is_online %}
+                        <span class="badge bg-danger">Online</span>
+                    {% endif %}
+                    <br>Стоимость: {{ schedule.cost }}
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-outline-success {% if schedule.is_completed %}active{% endif %}" {% if schedule.is_completed %}disabled{% endif %}>
+                            Выполнено
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary {% if schedule.is_paid %}active{% endif %}"
+                            {% if not schedule.is_completed or schedule.is_paid %}disabled{% endif %}>
+                                Оплачено
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="totals">
+                    <div>План выплат: {{ total.plan }}</div>
+                    <div>К оплате: {{ total.due }}</div>
+                    <div>Выплачено: {{ total.paid }}</div>
+                </div>
+            {% endif %}
+            {% if not schedules %}
+                <div style="font-size: 17px; text-align: center; padding-top: 10px; color: #0288d1">Нет запланированных встреч</div>
+            {% endif %}
     </div>
-    {% empty %}
-    <p>Нет запланированных встреч.</p>
     {% endfor %}
 </div>
 
@@ -81,7 +91,8 @@
                     <div class="mb-3">
                         <label for="search_client" class="form-label">Клиент</label>
                         <div style="position: relative;">
-                            <input type="text" name="search_client" id="search_client" class="form-control" placeholder="Поиск клиента" value="{{ request.GET.search }}" required>
+                            <input type="text" name="search_client" id="search_client" class="form-control"
+                                   placeholder="Поиск клиента" value="{{ request.GET.search }}" required>
                             <ul id="search-res" class="list-group"></ul>
                         </div>
                     </div>
@@ -96,14 +107,17 @@
                     <div class="mb-3 d-flex justify-content-between">
                         <div style="flex: 1;">
                             <label for="scheduleDate" class="form-label">Дата</label>
-                            <input type="date" name="schedule_date" id="scheduleDate" class="form-control" style="width:125px" min="1900-01-01" max="3000-12-31" required>
+                            <input type="date" name="schedule_date" id="scheduleDate" class="form-control"
+                                   style="width:125px" min="1900-01-01" max="3000-12-31" required>
                         </div>
                         <div style="flex: 1;">
                             <label class="form-label">Время</label>
                             <div class="d-flex align-items-center">
-                                <input type="number" name="schedule_hour" id="scheduleHour" class="form-control me-1" style="width: 60px;" min="0" max="23" placeholder="чч" value="09" required>
+                                <input type="number" name="schedule_hour" id="scheduleHour" class="form-control me-1"
+                                       style="width: 60px;" min="0" max="23" placeholder="чч" value="09" required>
                                 <span>:</span>
-                                <input type="number" name="schedule_minute" id="scheduleMinute" class="form-control ms-1" style="width: 60px;" min="0" max="59" placeholder="мм" value="00" required>
+                                <input type="number" name="schedule_minute" id="scheduleMinute" class="form-control ms-1"
+                                       style="width: 60px;" min="0" max="59" placeholder="мм" value="00" required>
                             </div>
                         </div>
                     </div>
@@ -116,5 +130,17 @@
         </div>
     </div>
 </div>
+<script>
+$('#addScheduleModal').on('show.bs.modal', function(event) {
+    var button = $(event.relatedTarget); // Получаем кнопку, которая вызвала модальное окно
+    var date = button.data('date'); // Получаем дату из атрибута data-date
 
+    if (date) {
+
+        $('#scheduleDate').val(date); // Устанавливаем значение в поле даты
+    }
+});
+</script>
 {% endblock %}
+
+

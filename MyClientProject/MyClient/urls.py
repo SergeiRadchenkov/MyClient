@@ -25,4 +25,7 @@ urlpatterns = [
     path('clients/<int:client_id>/delete/', views.delete_client, name='delete_client'),
     path('add_schedule/', views.add_schedule, name='add_schedule'),
     path('get_client_cost/<int:client_id>/', views.get_client_cost, name='get_client_cost'),
+    path('schedule/<int:schedule_id>/', views.schedule_detail, name='schedule_detail'),
+    path('delete_schedule/<int:schedule_id>/', views.delete_schedule, name='delete_schedule'),
+    path('edit_schedule/<int:schedule_id>/', views.edit_schedule, name='edit_schedule'),
 ]

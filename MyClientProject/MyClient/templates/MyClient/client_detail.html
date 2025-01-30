@@ -20,7 +20,7 @@
                 <!-- Форма для отправки запроса на удаление профиля -->
                 <form method="post" action="{% url 'delete_client' client.id %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Да</button> <!-- Кнопка "Да" стилизована как btn-primary -->
+                    <button type="submit" class="btn btn-danger">Да</button>
                 </form>
             </div>
         </div>
