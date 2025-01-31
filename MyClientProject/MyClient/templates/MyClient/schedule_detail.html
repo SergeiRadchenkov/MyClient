@@ -43,7 +43,7 @@
         </div>
     </div>
     <div class="client-settings">
-        <a onclick="history.back()" class="back-btn">
+        <a id="backBtn" class="back-btn">
             <i class="fa fa-arrow-left"></i> <!-- Иконка стрелочки назад -->
         </a>
         <div class="settings-buttons">
@@ -75,36 +75,38 @@
                         <label for="search_client" class="form-label">Клиент</label>
                         <div style="position: relative;">
                             <input type="text" name="search_client" id="search_client" class="form-control"
-                                   placeholder="Поиск клиента" value="{{ request.GET.search|default:schedule.client }}" required>
+                                   placeholder="Поиск клиента" value="{{ request.GET.search|default:client }}" required>
                             <ul id="search-res" class="list-group"></ul>
                         </div>
                     </div>
+                    <input type="hidden" id="currentClientId" name="current_client_id" value="{{ client.id }}">
+                    <input type="hidden" id="currentClient" name="current_client" value="{{ client }}">
                     <div class="mb-3">
-                        <label for="edit_schedule_cost" class="form-label">Стоимость</label>
-                        <input type="number" id="edit_schedule_cost" name="schedule_cost" class="form-control"
-                               value="{{ schedule.cost }}" required>
+                        <label for="schedule_cost" class="form-label">Стоимость</label>
+                        <input type="number" id="schedule_cost" class="form-control" max="100000000"
+                               value="{{ schedule.cost|stringformat:'.f' }}" required>
                     </div>
                     <div class="mb-3">
-                        <label for="edit_is_online" class="form-label">Онлайн</label>
-                        <input type="checkbox" id="edit_is_online" name="is_online" class="form-check-input"
+                        <label for="is_online" class="form-label">Онлайн</label>
+                        <input type="checkbox" id="is_online" name="is_online" class="form-check-input"
                                {% if schedule.is_online %}checked{% endif %}>
                     </div>
                     <div class="mb-3 d-flex justify-content-between">
                         <div style="flex: 1;">
-                            <label for="edit_schedule_date" class="form-label">Дата</label>
-                            <input type="date" name="schedule_date" id="edit_schedule_date" class="form-control"
-                                   value="{{ schedule.date|date:'Y-m-d' }}" required>
+                            <label for="scheduleDate" class="form-label">Дата</label>
+                            <input type="date" name="schedule_date" id="scheduleDate" class="form-control"
+                                   value="{{ schedule.date|date:'Y-m-d' }}" style="width:125px" required>
                         </div>
                         <div style="flex: 1;">
                             <label class="form-label">Время</label>
                             <div class="d-flex align-items-center">
-                                <input type="number" name="schedule_hour" id="edit_schedule_hour"
-                                       class="form-control me-1" style="width: 60px;" min="0" max="23"
+                                <input type="number" name="schedule_hour" id="scheduleHour"
+                                       class="form-control me-1" style="width: 60px;" min="0" max="23" placeholder="чч"
                                        value="{{ schedule.time|date:'H' }}" required>
                                 <span>:</span>
-                                <input type="number" name="schedule_minute" id="edit_schedule_minute"
+                                <input type="number" name="schedule_minute" id="scheduleMinute"
                                        class="form-control ms-1" style="width: 60px;" min="0" max="59"
-                                       value="{{ schedule.time|date:'i' }}" required>
+                                       placeholder="мм" value="{{ schedule.time|date:'i' }}" required>
                             </div>
                         </div>
                     </div>
@@ -117,7 +119,199 @@
         </div>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('search_client').addEventListener('input', function() {
+        const query = this.value;
+        const resultsContainer = document.getElementById('search-res');
 
+         // Если поле пустое, скрываем результаты
+        if (!query) {
+            resultsContainer.style.display = 'none';
+            return;
+        }
+
+        // Отправляем запрос на сервер для получения результатов автозаполнения
+        fetch(`/autocomplete/?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                resultsContainer.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(client => {
+                        const li = document.createElement('li');
+                        li.classList.add('list-group-item');
+                        li.textContent = client.name;
+
+                        li.addEventListener('click', () => {
+                            // Устанавливаем выбранное имя клиента в поле поиска
+                            document.getElementById('search_client').value = client.name;
+
+                            // Прячем список результатов
+                            resultsContainer.style.display = 'none';
+
+                            // Устанавливаем ID клиента в скрытое поле формы
+                            if (!document.getElementById('clientId')) {
+                                const hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name = 'client_id';
+                                hiddenInput.id = 'clientId';
+                                document.getElementById('editScheduleForm').appendChild(hiddenInput);
+                            }
+                            document.getElementById('clientId').value = client.id;
+
+                            // Загружаем стоимость клиента
+                            fetch(`/get_client_cost/${client.id}/`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    const isOnline = document.getElementById("is_online").checked;
+                                    document.getElementById('schedule_cost').value = isOnline ? data.price_online : data.price_offline;
+                                });
+                        });
+                        resultsContainer.appendChild(li);
+                    });
+                    resultsContainer.style.display = 'block';
+                } else {
+                    resultsContainer.style.display = 'none';
+                }
+            });
+    });
+
+    // Слушатель для изменения онлайн/оффлайн и пересчета стоимости
+    document.getElementById("is_online").addEventListener("change", function() {
+        const clientId = document.getElementById('clientId')?.value;
+
+        if (clientId) {
+            fetch(`/get_client_cost/${clientId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    const isOnline = document.getElementById("is_online").checked;
+                    document.getElementById('schedule_cost').value = isOnline ? data.price_online : data.price_offline;
+                });
+        }
+    });
+
+    // Отправка формы через AJAX
+    document.getElementById('editScheduleForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Предотвращение стандартной отправки формы
+        const formData = new FormData(this);
+        let clientID = document.getElementById("clientId")?.value;
+        const scheduleCost = document.getElementById("schedule_cost").value;
+
+        // Удаляем предыдущее сообщение об ошибке, если оно есть
+        const errorElement = document.getElementById("client-error");
+        if (errorElement) {
+            errorElement.remove();
+        }
+
+        // Если clientID отсутствует, используем текущее значение client.id
+        if (!clientID) {
+            clientID = document.getElementById("currentClientId").value; // Скрытое поле с текущим клиентом
+        }
+
+        if (document.getElementById('search_client').value != document.getElementById('currentClient').value) {
+            if (document.getElementById("currentClientId").value == clientID) {
+                const inputField = document.getElementById('search_client');
+                const errorMessage = document.createElement("div");
+                errorMessage.id = "client-error";
+                errorMessage.textContent = "Клиент не найден. Выберите клиента из списка.";
+                errorMessage.style.color = "red";
+                errorMessage.style.marginTop = "5px";
+                inputField.parentNode.insertBefore(errorMessage, inputField.nextSibling);
+                return;
+            }
+        }
+            formData.append("schedule_cost", scheduleCost);
+            formData.append("client_id", clientID);
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload(); // Перезагрузка страницы
+            } else {
+                alert(data.error);
+            }
+        })
+        .catch(error => {
+            alert("Произошла ошибка. Попробуйте еще раз.");
+        });
+
+
+});
+
+        const editScheduleModal = document.getElementById('editScheduleModal');
+        const editScheduleForm = document.getElementById('editScheduleForm');
+
+        // Событие сброса формы при закрытии модального окна
+        editScheduleModal.addEventListener('hidden.bs.modal', function () {
+            editScheduleForm.reset();
+
+            // Очистка результатов поиска
+            const searchResults = document.getElementById('search-res');
+            searchResults.innerHTML = '';
+            searchResults.style.display = 'none';
+        });
+    });
+
+    // Функция для ограничения ввода до 2 цифр
+    function limitInputToTwoDigits(event) {
+        const value = event.target.value;
+        if (value.length > 2) {
+            event.target.value = value.slice(0, 2); // Ограничение длины до 2 символов
+        }
+    }
+
+    // Получаем элементы
+    const hourInput1 = document.getElementById('scheduleHour');
+    const minuteInput1 = document.getElementById('scheduleMinute');
+
+    // Добавляем обработчик событий для каждого поля
+    hourInput1.addEventListener('input', limitInputToTwoDigits);
+    minuteInput1.addEventListener('input', limitInputToTwoDigits);
+    document.addEventListener('DOMContentLoaded', function() {
+
+});
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('editScheduleModal');
+    const ending = ' яя';
+
+    // Обработчик для события показа модального окна
+    modal.addEventListener('show.bs.modal', function() {
+        const searchInput = document.getElementById('search_client');
+        if (searchInput && searchInput.value.endsWith(ending)) {
+            searchInput.value = searchInput.value.slice(0, -ending.length);
+        }
+    });
+});
+    document.addEventListener('DOMContentLoaded', function() {
+    const currentClientInput = document.getElementById('currentClient');
+    const ending = ' яя';
+
+    if (currentClientInput && currentClientInput.value.endsWith(ending)) {
+        currentClientInput.value = currentClientInput.value.slice(0, -ending.length);
+    }
+});
+    // Проверяем, была ли текущая страница перезагружена
+    const backBtn = document.getElementById('backBtn');
+    const wasReloaded = performance.getEntriesByType('navigation')[0]?.type === 'reload';
+
+    backBtn.addEventListener('click', (event) => {
+        event.preventDefault(); // Останавливаем стандартное действие
+
+        if (wasReloaded) {
+            // Если страница была перезагружена, перенаправляем на schedule
+            window.location.href = '/schedule';
+        } else {
+            // Иначе используем history.back()
+            history.back();
+        }
+    });
+</script>
 {% endblock %}
 {% block extra_styles %}
 <style>

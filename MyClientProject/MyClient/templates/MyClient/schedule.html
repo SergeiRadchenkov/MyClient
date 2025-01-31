@@ -8,18 +8,18 @@
 
 <!-- Фильтр и поиск -->
 <div class="client-controls mb-4">
-    <form method="GET" action="{% url 'schedule' %}">
+    <form id="filterForm" method="GET" action="{% url 'schedule' %}">
         <div class="clients-top">
             <div class="search1">
-                <input type="text" name="search" id="search" class="form-control" placeholder="Поиск клиента" value="{{ request.GET.search }}">
-                <ul id="search-results" class="list-group"></ul>
+                <input type="text" name="search_client" id="search_schedules" class="form-control" placeholder="Поиск клиента" value="{{ request.GET.search }}">
+                <ul id="search-res-schedules" class="list-group"></ul>
                 <button type="submit" class="btn" style="background-color: #0288d1; color: white; border: none;
                 width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;">
                     <i class="fas fa-search"></i>  <!-- Иконка лупы -->
                 </button>
             </div>
             <div>
-                <input type="date" name="start_date" class="form-select" value="{{ start_date|date:'Y-m-d' }}">
+                <input type="date" name="start_date" id="startDate" class="form-select" value="{{ start_date|date:'Y-m-d' }}">
             </div>
             <div>
                 <!-- Кнопка для открытия модального окна -->
@@ -98,7 +98,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="schedule_cost" class="form-label">Стоимость</label>
-                        <input type="number" id="schedule_cost" class="form-control" required>
+                        <input type="number" id="schedule_cost" class="form-control" max="100000000" required>
                     </div>
                     <div class="mb-3">
                         <label for="is_online" class="form-label">Онлайн</label>
@@ -139,6 +139,216 @@ $('#addScheduleModal').on('show.bs.modal', function(event) {
 
         $('#scheduleDate').val(date); // Устанавливаем значение в поле даты
     }
+});
+</script>
+<script>
+    document.getElementById('search_client').addEventListener('input', function() {
+        const query = this.value;
+        const resultsContainer = document.getElementById('search-res');
+
+         // Если поле пустое, скрываем результаты
+        if (!query) {
+            resultsContainer.style.display = 'none';
+            return;
+        }
+
+        // Отправляем запрос на сервер для получения результатов автозаполнения
+        fetch(`/autocomplete/?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                resultsContainer.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(client => {
+                        const li = document.createElement('li');
+                        li.classList.add('list-group-item');
+                        li.textContent = client.name;
+
+                        li.addEventListener('click', () => {
+                            // Устанавливаем выбранное имя клиента в поле поиска
+                            document.getElementById('search_client').value = client.name;
+
+                            // Прячем список результатов
+                            resultsContainer.style.display = 'none';
+
+                            // Устанавливаем ID клиента в скрытое поле формы
+                            if (!document.getElementById('clientId')) {
+                                const hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name = 'client_id';
+                                hiddenInput.id = 'clientId';
+                                document.getElementById('addScheduleForm').appendChild(hiddenInput);
+                            }
+                            document.getElementById('clientId').value = client.id;
+
+                            // Загружаем стоимость клиента
+                            fetch(`/get_client_cost/${client.id}/`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    const isOnline = document.getElementById("is_online").checked;
+                                    document.getElementById('schedule_cost').value = isOnline ? data.price_online : data.price_offline;
+                                });
+                        });
+                        resultsContainer.appendChild(li);
+                    });
+                    resultsContainer.style.display = 'block';
+                } else {
+                    resultsContainer.style.display = 'none';
+                }
+            });
+    });
+
+    // Слушатель для изменения онлайн/оффлайн и пересчета стоимости
+    document.getElementById("is_online").addEventListener("change", function() {
+        const clientId = document.getElementById('clientId')?.value;
+
+        if (clientId) {
+            fetch(`/get_client_cost/${clientId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    const isOnline = document.getElementById("is_online").checked;
+                    document.getElementById('schedule_cost').value = isOnline ? data.price_online : data.price_offline;
+                });
+        }
+    });
+
+    // Отправка формы через AJAX
+    document.getElementById("addScheduleForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const isOnline = document.getElementById("is_online").checked;
+        const scheduleCost = document.getElementById("schedule_cost").value;
+
+        // Удаляем предыдущее сообщение об ошибке, если оно есть
+        const errorElement = document.getElementById("client-error");
+        if (errorElement) {
+            errorElement.remove();
+        }
+
+        formData.append("is_online", isOnline);
+        formData.append("schedule_cost", scheduleCost);
+
+        fetch("{% url 'add_schedule' %}", {
+            method: "POST",
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    // Если клиент не найден, добавляем сообщение об ошибке
+                    const inputField = document.getElementById('search_client');
+                    const errorMessage = document.createElement("div");
+                    errorMessage.id = "client-error";
+                    errorMessage.textContent = "Клиент не найден. Выберите клиента из списка.";
+                    errorMessage.style.color = "red";
+                    errorMessage.style.marginTop = "5px";
+                    inputField.parentNode.insertBefore(errorMessage, inputField.nextSibling);
+                }
+            })
+            .catch(error => {
+                alert("Произошла ошибка. Попробуйте еще раз.");
+            });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const addScheduleModal = document.getElementById('addScheduleModal');
+        const addScheduleForm = document.getElementById('addScheduleForm');
+
+        // Событие сброса формы при закрытии модального окна
+        addScheduleModal.addEventListener('hidden.bs.modal', function () {
+            addScheduleForm.reset();
+
+            // Очистка результатов поиска
+            const searchResults = document.getElementById('search-res');
+            searchResults.innerHTML = '';
+            searchResults.style.display = 'none';
+        });
+    });
+
+    // Функция для ограничения ввода до 2 цифр
+    function limitInputToTwoDigits(event) {
+        const value = event.target.value;
+        if (value.length > 2) {
+            event.target.value = value.slice(0, 2); // Ограничение длины до 2 символов
+        }
+    }
+
+    // Получаем элементы
+    const hourInput = document.getElementById('scheduleHour');
+    const minuteInput = document.getElementById('scheduleMinute');
+
+    // Добавляем обработчик событий для каждого поля
+    hourInput.addEventListener('input', limitInputToTwoDigits);
+    minuteInput.addEventListener('input', limitInputToTwoDigits);
+    document.addEventListener('DOMContentLoaded', function() {
+
+});
+    // Получаем элемент выбора даты
+    const startDateInput = document.getElementById('startDate');
+
+    // Добавляем обработчик изменения значения
+    startDateInput.addEventListener('change', function () {
+        // Отправляем форму с выбранной датой
+        document.getElementById('filterForm').submit();
+    });
+</script>
+<script>
+    document.getElementById('search_schedules').addEventListener('input', function() {
+        const query_schedules = this.value;
+        const resultsContainer = document.getElementById('search-res-schedules');
+
+        // Если поле пустое, скрываем результаты
+        if (!query_schedules) {
+            resultsContainer.style.display = 'none';
+            return;
+        }
+
+    // Отправляем запрос на сервер для получения результатов автозаполнения
+    fetch(`/autocomplete/?query_schedules=${query_schedules}`)
+        .then(response => response.json())
+        .then(data => {
+            resultsContainer.innerHTML = '';
+            if (data.length > 0) {
+                data.forEach(client => {
+                    const li = document.createElement('li');
+                    li.classList.add('list-group-item');
+
+                    // Проверяем, чтобы значения не были undefined
+                    const metro = client.metro ? `метро ${client.metro}` : '';
+                    const street = client.street ? `улица ${client.street}` : '';
+
+                    // Обновляем текст, показывая только если есть значения
+                    li.textContent = `${client.name}${metro ? ', ' + metro : ''}${street ? ', ' + street : ''}`;
+
+                    li.addEventListener('click', () => {
+                        // Извлекаем только имя и фамилию из значения name
+                        const fullName = client.name.split(' ');
+                        const firstName = fullName[0].replace(',', '');  // Первая часть - имя
+                        const lastName = fullName.length > 1 ? fullName[1].replace(',', '') : '';  // Вторая часть - фамилия (если есть)
+
+                        // Прячем результаты
+                        resultsContainer.style.display = 'none';
+
+                        // Формируем URL с параметром поиска
+                        let searchUrl = `?search=${firstName}`;
+                        if (lastName && lastName !== "метр" && lastName !== "улиц") {
+                            searchUrl += ` ${lastName}`; // Добавляем lastName только если он существует
+                        }
+
+                        // Перенаправляем на URL
+                        window.location.href = searchUrl;
+
+                        // Очищаем поле ввода
+                        document.getElementById('search_schedules').value = '';
+                    });
+                    resultsContainer.appendChild(li);
+                });
+                resultsContainer.style.display = 'block';
+            } else {
+                resultsContainer.style.display = 'none';
+            }
+        });
 });
 </script>
 {% endblock %}

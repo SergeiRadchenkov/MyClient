@@ -650,3 +650,13 @@ input[type="number"] {
 .schedule-day .totals {
     font-size: 16px; /* Размер шрифта */
 }
+
+
+/* При необходимости, добавляем кастомный стиль */
+input[type="date"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    background: #fff;
+}

@@ -21,7 +21,7 @@ def schedule(request):
     if not request.user.is_authenticated:
         return redirect('auth')
 
-    search_query = request.GET.get('search_client', '').strip().lower()
+    search_query = request.GET.get('search_schedules', '').strip().lower()
     start_date_str = request.GET.get('start_date', date.today().strftime('%Y-%m-%d'))
     start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
 
@@ -70,8 +70,9 @@ def schedule(request):
                         'floor': client.floor,
                         'intercom': client.intercom
                     })
-            return render(request, 'MyClient/clients.html',
-                          {'clients': results, 'search_query': search_query})
+            return render(request, 'MyClient/schedules.html',
+                          {'clients': results, 'search_query': search_query,
+                           'schedules': schedules, 'start_date': start_date})
 
 
     # Группировка по датам
@@ -132,32 +133,16 @@ def add_schedule(request):
 @login_required
 @csrf_exempt
 def edit_schedule(request, schedule_id):
-    schedule = get_object_or_404(Schedule, id=schedule_id)
-
     if request.method == "POST":
-        try:
-            # Получаем client_id из формы
-            client_id = request.POST.get('client_id')
-            schedule.client = Client.objects.get(id=client_id)
-        except Client.DoesNotExist:
-            messages.error(request, "Выбранный клиент не существует.")
-            return redirect('schedule_detail', schedule_id=schedule.id)
-
-        # Обновляем другие поля расписания
-        schedule.date = request.POST.get('schedule_date')
-        hour = int(request.POST.get('schedule_hour'))
-        minute = int(request.POST.get('schedule_minute'))
+        schedule = get_object_or_404(Schedule, id=schedule_id)
+        schedule.client_id = request.POST.get('client_id')
         schedule.cost = request.POST.get('schedule_cost')
-        schedule.is_online = 'is_online' in request.POST
-
-        # Формируем время
-        schedule.time = f"{hour:02}:{minute:02}"
-
+        schedule.is_online = request.POST.get('is_online') == 'true'
+        schedule.date = request.POST.get('schedule_date')
+        schedule.time = f"{request.POST.get('schedule_hour')}:{request.POST.get('schedule_minute')}"
         schedule.save()
-        messages.success(request, "Встреча успешно обновлена.")
-        return redirect('schedule_detail', schedule_id=schedule.id)
-
-    return redirect('schedule_detail', schedule_id=schedule.id)
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 
 def schedule_detail(request, schedule_id):
@@ -598,5 +583,5 @@ def delete_schedule(request, schedule_id):
     schedule = get_object_or_404(Schedule, id=schedule_id)
     if request.method == "POST":
         schedule.delete()
-        return redirect('schedule')  # Замените на нужную страницу
+        return redirect('schedule')
     return redirect('schedule_detail', schedule_id=schedule_id)
