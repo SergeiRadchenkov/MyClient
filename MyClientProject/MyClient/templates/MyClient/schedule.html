@@ -11,7 +11,7 @@
     <form id="filterForm" method="GET" action="{% url 'schedule' %}">
         <div class="clients-top">
             <div class="search1">
-                <input type="text" name="search_client" id="search_schedules" class="form-control" placeholder="Поиск клиента" value="{{ request.GET.search }}">
+                <input type="text" name="search_client" id="search_schedules" class="form-control" placeholder="Поиск клиента" value="{{ request.GET.search_schedules }}">
                 <ul id="search-res-schedules" class="list-group"></ul>
                 <button type="submit" class="btn" style="background-color: #0288d1; color: white; border: none;
                 width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;">
@@ -47,13 +47,15 @@
         </div>
             {% if schedules %}
                 {% for schedule in schedules %}
-                <div class="schedule-one" onclick="location.href='{% url 'schedule_detail' schedule.id %}'">
-                    <strong>{{ schedule.client.first_name }}{% if schedule.client.last_name != "яя" %} {{ schedule.client.last_name }}{% endif %}</strong>
-                    <br>Время: {{ schedule.time|date:"H:i" }}
-                    {% if schedule.is_online %}
-                        <span class="badge bg-danger">Online</span>
-                    {% endif %}
-                    <br>Стоимость: {{ schedule.cost }}
+                <div class="schedule-one">
+                    <div onclick="location.href='{% url 'schedule_detail' schedule.id %}'">
+                        <strong>{{ schedule.client.first_name }}{% if schedule.client.last_name != "яя" %} {{ schedule.client.last_name }}{% endif %}</strong>
+                        <br>Время: {{ schedule.time|date:"H:i" }}
+                        {% if schedule.is_online %}
+                            <span class="badge bg-danger">Online</span>
+                        {% endif %}
+                        <br>Стоимость: {{ schedule.cost }}
+                    </div>
                     <div class="mt-2">
                         <button class="btn btn-sm btn-outline-success {% if schedule.is_completed %}active{% endif %}" {% if schedule.is_completed %}disabled{% endif %}>
                             Выполнено
@@ -305,7 +307,7 @@ $('#addScheduleModal').on('show.bs.modal', function(event) {
         }
 
     // Отправляем запрос на сервер для получения результатов автозаполнения
-    fetch(`/autocomplete/?query_schedules=${query_schedules}`)
+    fetch(`/autocomplete/?search_schedules=${query_schedules}`)
         .then(response => response.json())
         .then(data => {
             resultsContainer.innerHTML = '';
@@ -331,7 +333,7 @@ $('#addScheduleModal').on('show.bs.modal', function(event) {
                         resultsContainer.style.display = 'none';
 
                         // Формируем URL с параметром поиска
-                        let searchUrl = `?search=${firstName}`;
+                        let searchUrl = `?search_schedules=${firstName}`;
                         if (lastName && lastName !== "метр" && lastName !== "улиц") {
                             searchUrl += ` ${lastName}`; // Добавляем lastName только если он существует
                         }
@@ -339,8 +341,6 @@ $('#addScheduleModal').on('show.bs.modal', function(event) {
                         // Перенаправляем на URL
                         window.location.href = searchUrl;
 
-                        // Очищаем поле ввода
-                        document.getElementById('search_schedules').value = '';
                     });
                     resultsContainer.appendChild(li);
                 });

@@ -50,11 +50,11 @@
     </div>
     <div class="form-group">
         <label for="price_offline">Цена за работу оффлайн:</label>
-        <input type="number" id="price_offline" name="price_offline" value="{% if client.price_offline != 0 %}{{ form.price_offline.value }}{% endif %}" max="100000000">
+        <input type="number" id="price_offline" name="price_offline" value="{% if client.price_offline != 0 %}{{ form.price_offline.value|stringformat:'.f' }}{% endif %}" max="100000000">
     </div>
     <div class="form-group">
         <label for="price_online">Цена за работу онлайн:</label>
-        <input type="number" id="price_online" name="price_online" value="{% if client.price_online != 0 %}{{ form.price_online.value }}{% endif %}" max="100000000">
+        <input type="number" id="price_online" name="price_online" value="{% if client.price_online != 0 %}{{ form.price_online.value|stringformat:'.f' }}{% endif %}" max="100000000">
     </div>
     <button type="submit" class="submit-btn">Сохранить изменения</button>
 </form>

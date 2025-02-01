@@ -25,55 +25,39 @@ def schedule(request):
     start_date_str = request.GET.get('start_date', date.today().strftime('%Y-%m-%d'))
     start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
 
-    clients = Client.objects.all()  # Список всех клиентов
-
     # Определяем диапазон отображаемых дат (9 дней начиная с `start_date`)
     date_range = [start_date + timedelta(days=i) for i in range(9)]
 
     # Получение расписания
-    schedules = Schedule.objects.filter(date__gte=start_date)
+    schedules = Schedule.objects.filter(date__gte=start_date, date__lte=max(date_range))
 
-    results = []
     if search_query:
-        schedules = schedules.filter(client__first_name__icontains=search_query)
         # Разделяем запрос на слова (например, "Иван Иванов")
         search_terms = search_query.split()
+        clients = Client.objects.all()
+        matched_clients = []
+        # Ищем клиентов, соответствующих запросу
         if len(search_terms) == 2:  # Если два слова (имя и фамилия)
             first_name, last_name = search_terms
             for client in clients:
                 if first_name in client.first_name.lower() and last_name in client.last_name.lower():
-                    results.append({
-                        'id': client.id,
-                        'first_name': client.first_name,
-                        'last_name': client.last_name,
-                        'metro': client.metro,
-                        'street': client.street,
-                        'house_number': client.house_number,
-                        'entrance': client.entrance,
-                        'floor': client.floor,
-                        'intercom': client.intercom
-                    })
+                    matched_clients.append(client)
         else:  # Если одно слово или больше двух
             for client in clients:
                 if any(term in client.first_name.lower() for term in search_terms) or \
                         any(term in client.last_name.lower() for term in search_terms) or \
                         any(term in client.metro.lower() for term in search_terms) or \
                         any(term in client.street.lower() for term in search_terms):
-                    results.append({
-                        'id': client.id,
-                        'first_name': client.first_name,
-                        'last_name': client.last_name,
-                        'metro': client.metro,
-                        'street': client.street,
-                        'house_number': client.house_number,
-                        'entrance': client.entrance,
-                        'floor': client.floor,
-                        'intercom': client.intercom
-                    })
-            return render(request, 'MyClient/schedules.html',
-                          {'clients': results, 'search_query': search_query,
-                           'schedules': schedules, 'start_date': start_date})
+                    matched_clients.append(client)
 
+        schedules = schedules.filter(client__id__in=[client.id for client in matched_clients])
+
+        schedule_data = {
+            date: schedules.filter(date=date) for date in date_range
+        }
+
+        return render(request, 'MyClient/schedule.html',
+                      {'schedule_data': schedule_data, 'start_date': start_date})
 
     # Группировка по датам
     schedule_data = {day: [] for day in date_range}
@@ -92,7 +76,6 @@ def schedule(request):
         'totals': totals,
         'start_date': start_date,
         'today': date.today(),  # Добавление переменной `today`
-        'clients': clients,
         'search_query': search_query,
     })
 
@@ -243,15 +226,21 @@ def clients(request):
 
 def autocomplete(request):
     query = request.GET.get('query', '').lower()
+    query_schedule = request.GET.get('search_schedules', '').lower()
     results = Client.objects.all()  # Получаем всех клиентов
     clients = []
 
+    if query:
+        main_query = query
+    elif query_schedule:
+        main_query = query_schedule
+
     for result in results:
         # Приводим к нижнему регистру и проверяем наличие подстроки в нужных полях
-        if (query in result.first_name.lower() or
-                query in result.last_name.lower() or
-                query in result.metro.lower() or
-                query in result.street.lower()):
+        if (main_query in result.first_name.lower() or
+                main_query in result.last_name.lower() or
+                main_query in result.metro.lower() or
+                main_query in result.street.lower()):
             # Добавляем клиента в список
             clients.append({
                 'id': result.id,
