@@ -36,6 +36,15 @@ class Schedule(models.Model):
     is_paid = models.BooleanField("Оплачено", default=False)
     cost = models.DecimalField("Стоимость", max_digits=10, decimal_places=2)
 
+    def get_plan(self):
+        return float(self.cost)
+
+    def get_due(self):
+        return float(self.cost) if self.is_completed and not self.is_paid else 0
+
+    def get_paid(self):
+        return float(self.cost) if self.is_paid else 0
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile', unique=True)
@@ -56,3 +65,19 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+
+class ScheduleAnalytics:
+    def __init__(self, schedules):
+        self.schedules = schedules
+
+    def get_totals_by_date(self):
+        totals = {}
+        for schedule in self.schedules:
+            date = schedule.date
+            if date not in totals:
+                totals[date] = {'plan': 0, 'due': 0, 'paid': 0}
+            totals[date]['plan'] += schedule.get_plan()
+            totals[date]['due'] += schedule.get_due()
+            totals[date]['paid'] += schedule.get_paid()
+        return totals

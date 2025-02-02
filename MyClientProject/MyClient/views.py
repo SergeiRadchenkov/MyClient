@@ -21,7 +21,7 @@ def schedule(request):
     if not request.user.is_authenticated:
         return redirect('auth')
 
-    search_query = request.GET.get('search_schedules', '').strip().lower()
+    client_id = request.GET.get('client_id')
     start_date_str = request.GET.get('start_date', date.today().strftime('%Y-%m-%d'))
     start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
 
@@ -31,53 +31,69 @@ def schedule(request):
     # Получение расписания
     schedules = Schedule.objects.filter(date__gte=start_date, date__lte=max(date_range))
 
-    if search_query:
-        # Разделяем запрос на слова (например, "Иван Иванов")
-        search_terms = search_query.split()
-        clients = Client.objects.all()
-        matched_clients = []
-        # Ищем клиентов, соответствующих запросу
-        if len(search_terms) == 2:  # Если два слова (имя и фамилия)
-            first_name, last_name = search_terms
-            for client in clients:
-                if first_name in client.first_name.lower() and last_name in client.last_name.lower():
-                    matched_clients.append(client)
-        else:  # Если одно слово или больше двух
-            for client in clients:
-                if any(term in client.first_name.lower() for term in search_terms) or \
-                        any(term in client.last_name.lower() for term in search_terms) or \
-                        any(term in client.metro.lower() for term in search_terms) or \
-                        any(term in client.street.lower() for term in search_terms):
-                    matched_clients.append(client)
+    if client_id:
+        try:
+            client = Client.objects.get(id=client_id)
+            schedules = schedules.filter(client=client)
 
-        schedules = schedules.filter(client__id__in=[client.id for client in matched_clients])
+            # Группировка расписания по датам
+            schedule_data = {
+                date: schedules.filter(date=date) for date in date_range
+            }
 
-        schedule_data = {
-            date: schedules.filter(date=date) for date in date_range
-        }
+            # Сортировка данных по времени внутри каждого дня
+            for day, schedules in schedule_data.items():
+                schedule_data[day] = sorted(schedules, key=lambda x: x.time)
 
-        return render(request, 'MyClient/schedule.html',
-                      {'schedule_data': schedule_data, 'start_date': start_date})
+            return render(request, 'MyClient/schedule.html', {
+                'schedule_data': schedule_data,
+                'client': client,
+                'start_date': start_date,
+            })
+        except Client.DoesNotExist:
+            # Если клиент с таким ID не найден
+            return render(request, 'MyClient/schedule.html', {
+                'error': 'Клиент не найден.',
+                'start_date': start_date,
+            })
 
     # Группировка по датам
     schedule_data = {day: [] for day in date_range}
     totals = {day: {'plan': 0, 'due': 0, 'paid': 0} for day in date_range}
+    totals_for_template = {str(date): values for date, values in totals.items()}
 
     for schedule in schedules:
         day = schedule.date
         if day in schedule_data:
             schedule_data[day].append(schedule)
-            totals[day]['plan'] += float(schedule.cost if not schedule.is_completed else 0)
-            totals[day]['due'] += float(schedule.cost if schedule.is_completed and not schedule.is_paid else 0)
-            totals[day]['paid'] += float(schedule.cost if schedule.is_paid else 0)
+            totals[day]['plan'] += schedule.get_plan()
+            totals[day]['due'] += schedule.get_due()
+            totals[day]['paid'] += schedule.get_paid()
+
+    # Сортировка данных по времени внутри каждого дня
+    for day, schedules in schedule_data.items():
+        schedule_data[day] = sorted(schedules, key=lambda x: x.time)
 
     return render(request, 'MyClient/schedule.html', {
         'schedule_data': schedule_data,
         'totals': totals,
         'start_date': start_date,
-        'today': date.today(),  # Добавление переменной `today`
-        'search_query': search_query,
+        'totals_for_template': totals_for_template,
     })
+
+
+@csrf_exempt
+@login_required
+def complete_schedule(request, schedule_id):
+    if request.method == 'POST':
+        try:
+            schedule = get_object_or_404(Schedule, id=schedule_id)
+            schedule.is_completed = not schedule.is_completed  # Переключаем состояние
+            schedule.save()
+            return JsonResponse({'status': 'success', 'is_completed': schedule.is_completed})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': 'Schedule not found'}, status=404)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 
 @login_required

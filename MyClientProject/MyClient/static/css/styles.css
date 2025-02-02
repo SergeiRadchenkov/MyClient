@@ -651,7 +651,6 @@ input[type="number"] {
     font-size: 16px; /* Размер шрифта */
 }
 
-
 /* При необходимости, добавляем кастомный стиль */
 input[type="date"] {
     padding: 5px;
@@ -659,4 +658,10 @@ input[type="date"] {
     border-radius: 4px;
     font-size: 16px;
     background: #fff;
+}
+
+.btn-outline-success {
+    --bs-btn-hover-color: #198754;
+    --bs-btn-hover-bg: #fff;
+    --bs-btn-hover-border-color: #198754;
 }
