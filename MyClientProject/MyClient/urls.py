@@ -29,4 +29,7 @@ urlpatterns = [
     path('delete_schedule/<int:schedule_id>/', views.delete_schedule, name='delete_schedule'),
     path('edit_schedule/<int:schedule_id>/', views.edit_schedule, name='edit_schedule'),
     path('schedule/complete/<int:schedule_id>/', views.complete_schedule, name='complete_schedule'),
+    path('schedule/pay/<int:schedule_id>/', views.pay_schedule, name='pay_schedule'),
+    path('schedule/cancel/<int:schedule_id>/', views.cancel_schedule, name='pay_schedule'),
+    path('add_block/', views.add_block, name='add_block'),
 ]

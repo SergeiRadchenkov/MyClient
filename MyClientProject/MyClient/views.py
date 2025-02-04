@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 import re
 from django.core.exceptions import ValidationError
-from .models import Profile, Client, Schedule
+from .models import Profile, Client, Schedule, Block
 from .forms import CustomUserChangeForm, ClientForm
 from django.contrib.auth import update_session_auth_hash
 from django.shortcuts import get_object_or_404
@@ -50,7 +50,7 @@ def schedule(request):
                 'client': client,
                 'start_date': start_date,
             })
-        except Client.DoesNotExist:
+        except Exception as e:
             # Если клиент с таким ID не найден
             return render(request, 'MyClient/schedule.html', {
                 'error': 'Клиент не найден.',
@@ -59,7 +59,7 @@ def schedule(request):
 
     # Группировка по датам
     schedule_data = {day: [] for day in date_range}
-    totals = {day: {'plan': 0, 'due': 0, 'paid': 0} for day in date_range}
+    totals = {day: {'plan': 0, 'due': 0, 'paid': 0, 'cancel': 0} for day in date_range}
     totals_for_template = {str(date): values for date, values in totals.items()}
 
     for schedule in schedules:
@@ -69,6 +69,7 @@ def schedule(request):
             totals[day]['plan'] += schedule.get_plan()
             totals[day]['due'] += schedule.get_due()
             totals[day]['paid'] += schedule.get_paid()
+            totals[day]['cancel'] += schedule.get_cancel()
 
     # Сортировка данных по времени внутри каждого дня
     for day, schedules in schedule_data.items():
@@ -89,8 +90,41 @@ def complete_schedule(request, schedule_id):
         try:
             schedule = get_object_or_404(Schedule, id=schedule_id)
             schedule.is_completed = not schedule.is_completed  # Переключаем состояние
+            if not schedule.is_completed:
+                schedule.is_paid = False  # Отжимаем "Оплачено" при снятии "Выполнено"
             schedule.save()
-            return JsonResponse({'status': 'success', 'is_completed': schedule.is_completed})
+            return JsonResponse({'status': 'success', 'is_completed': schedule.is_completed, 'is_paid': schedule.is_paid})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': 'Schedule not found'}, status=404)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+@csrf_exempt
+@login_required
+def pay_schedule(request, schedule_id):
+    if request.method == 'POST':
+        try:
+            schedule = get_object_or_404(Schedule, id=schedule_id)
+            schedule.is_paid = not schedule.is_paid  # Переключаем состояние
+            schedule.save()
+            return JsonResponse({'status': 'success', 'is_paid': schedule.is_paid})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': 'Schedule not found'}, status=404)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+@csrf_exempt
+@login_required
+def cancel_schedule(request, schedule_id):
+    if request.method == 'POST':
+        try:
+            schedule = get_object_or_404(Schedule, id=schedule_id)
+            schedule.is_canceled  = not schedule.is_canceled  # Переключаем состояние
+            if schedule.is_canceled:
+                schedule.is_paid = False  # Сбросить оплату при отмене
+                schedule.is_completed = False  # Сбросить выполнение при отмене
+            schedule.save()
+            return JsonResponse({'status': 'success', 'is_canceled': schedule.is_canceled})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': 'Schedule not found'}, status=404)
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
@@ -299,7 +333,65 @@ def profile(request):
 
 @login_required
 def blocks(request):
-    return render(request, 'MyClient/blocks.html')
+    choice_filter = request.GET.get('choice_block', 'active')
+
+    client_id = request.GET.get('client_id')
+
+    # Фильтрация блоков
+    blocks = Block.objects.all()
+    if client_id:
+        client = Client.objects.get(id=client_id)
+        blocks = blocks.filter(client=client)
+    if choice_filter == 'active':
+        blocks = blocks.filter(status='active')
+    elif choice_filter == 'completed':
+        blocks = blocks.filter(status='completed')
+
+    context = {
+        'blocks': blocks,
+        'request': request,
+    }
+
+    return render(request, 'MyClient/blocks.html', context)
+
+
+@csrf_exempt
+def add_block(request):
+    if request.method == 'POST':
+        try:
+            client_id = request.POST.get('client_id')
+            total_meetings = int(request.POST.get('total_meetings', 0))
+            completed_meetings = int(request.POST.get('completed_meetings', 0))
+            cost = request.POST.get('block_cost')
+
+            # Проверка наличия клиента
+            client = Client.objects.get(id=client_id)
+
+            # Проверка входных данных
+            if completed_meetings > total_meetings:
+                return JsonResponse({'success': False,
+                                     'error': 'Количество завершенных встреч не может превышать общее количество встреч.'})
+
+            Block.create_block(
+                client=client,
+                total_meetings=total_meetings,
+                completed_meetings=completed_meetings,
+                cost=cost
+            )
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+def autocomplete_clients(request):
+    """Автозаполнение для поиска клиентов."""
+    query = request.GET.get('query', '')
+    if query:
+        clients = Client.objects.filter(name__icontains=query)[:10]
+        results = [{'id': client.id, 'name': client.name} for client in clients]
+        return JsonResponse(results, safe=False)
+    return JsonResponse([], safe=False)
 
 
 def auth_redirect(request):

@@ -59,12 +59,17 @@
                     <div class="mt-2">
                         <button
                             class="btn btn-sm {% if schedule.is_completed %}btn-success{% else %}btn-outline-success{% endif %} btn-completed"
-                            data-schedule-id="{{ schedule.id }}">
+                            data-schedule-id="{{ schedule.id }}" {% if schedule.is_canceled %}disabled{% endif %}>
                             Выполнено
                         </button>
-                        <button class="btn btn-sm btn-outline-primary {% if schedule.is_paid %}active{% endif %}"
-                            {% if not schedule.is_completed or schedule.is_paid %}disabled{% endif %}>
+                        <button class="btn btn-sm {% if schedule.is_paid %}btn-primary{% else %}btn-outline-primary{% endif %} btn-paid"
+                                data-schedule-id="{{ schedule.id }}"
+                                {% if not schedule.is_completed %}disabled{% endif %}>
                                 Оплачено
+                        </button>
+                        <button class="btn btn-sm {% if schedule.is_canceled %}btn-danger{% else %}btn-outline-danger{% endif %} btn-canceled"
+                                data-schedule-id="{{ schedule.id }}">
+                                Отменено
                         </button>
                     </div>
                 </div>
@@ -75,6 +80,7 @@
                             <div>План выплат: {{ total.plan|stringformat:'.f' }}</div>
                             <div>К оплате: {{ total.due|stringformat:'.f' }}</div>
                             <div>Выплачено: {{ total.paid|stringformat:'.f' }}</div>
+                            <div>Отменено: {{ total.cancel|stringformat:'.f' }}</div>
                         </div>
                     {% endif %}
                 {% endfor %}
@@ -376,10 +382,103 @@ $('#addScheduleModal').on('show.bs.modal', function(event) {
                         if (data.is_completed) {
                             this.classList.remove("btn-outline-success");
                             this.classList.add("btn-success");
-                            location.reload();
                         } else {
                             this.classList.remove("btn-success");
                             this.classList.add("btn-outline-success");
+                        }
+
+                        // Находим кнопку "Оплачено" для той же записи
+                        const paidButton = document.querySelector(`.btn-paid[data-schedule-id="${scheduleId}"]`);
+                        if (paidButton) {
+                            if (data.is_paid) {
+                                paidButton.classList.remove("btn-outline-primary");
+                                paidButton.classList.add("btn-primary");
+                                paidButton.disabled = false;
+                            } else {
+                                paidButton.classList.remove("btn-primary");
+                                paidButton.classList.add("btn-outline-primary");
+                                paidButton.disabled = true;
+                            }
+                        }
+                        location.reload();
+                    } else {
+                        console.error("Ошибка:", data.message);
+                    }
+                })
+                .catch(error => console.error("Ошибка:", error));
+            });
+        });
+    });
+</script>
+<script>
+    // Функция для обработки нажатия кнопки "Оплачено"
+    document.addEventListener("DOMContentLoaded", function () {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // Добавляем обработчики событий для всех кнопок "Оплачено"
+        document.querySelectorAll(".btn-paid").forEach(button => {
+            button.addEventListener("click", function () {
+                const scheduleId = this.dataset.scheduleId; // ID записи из атрибута data-schedule-id
+
+                fetch(`/schedule/pay/${scheduleId}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        // Меняем состояние кнопки в зависимости от is_paid
+                        if (data.is_paid) {
+                            this.classList.remove("btn-outline-primary");
+                            this.classList.add("btn-primary");
+                            location.reload();
+                        } else {
+                            this.classList.remove("btn-primary");
+                            this.classList.add("btn-outline-primary");
+                            location.reload();
+                        }
+                    } else {
+                        console.error("Ошибка:", data.message);
+                    }
+                })
+                .catch(error => console.error("Ошибка:", error));
+            });
+        });
+    });
+</script>
+<script>
+    // Функция для обработки нажатия кнопки "Отменено"
+    document.addEventListener("DOMContentLoaded", function () {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // Добавляем обработчики событий для всех кнопок "Оплачено"
+        document.querySelectorAll(".btn-canceled").forEach(button => {
+            button.addEventListener("click", function () {
+                const scheduleId = this.dataset.scheduleId; // ID записи из атрибута data-schedule-id
+
+                fetch(`/schedule/cancel/${scheduleId}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        // Меняем состояние кнопки в зависимости от is_cancel
+                        if (data.is_cancel) {
+                            this.classList.remove("btn-outline-danger");
+                            this.classList.add("btn-danger");
+                            location.reload();
+                        } else {
+                            this.classList.remove("btn-danger");
+                            this.classList.add("btn-outline-danger");
                             location.reload();
                         }
                     } else {

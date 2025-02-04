@@ -665,3 +665,19 @@ input[type="date"] {
     --bs-btn-hover-bg: #fff;
     --bs-btn-hover-border-color: #198754;
 }
+
+.btn-outline-primary {
+    --bs-btn-hover-color: #0d6efd;
+    --bs-btn-hover-bg: #fff;
+    --bs-btn-hover-border-color: #0d6efd;
+}
+
+.btn-outline-danger {
+    --bs-btn-hover-color: #dc3545;
+    --bs-btn-hover-bg: #fff;
+    --bs-btn-hover-border-color: #dc3545;
+}
+
+.btn-group-sm>.btn, .btn-sm {
+    --bs-btn-font-size: 0.75rem;
+}

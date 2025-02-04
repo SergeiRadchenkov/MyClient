@@ -5,6 +5,276 @@
 {% block title %}Блоки{% endblock %}
 
 {% block content %}
-<h1>Блоки</h1>
-<!-- Контент страницы -->
+<div>
+    <!-- Раздел добавления и управления блоками -->
+    <div class="client-controls mb-4">
+        <form id="filterForm" method="GET" action="{% url 'blocks' %}">
+            <div class="clients-top">
+                <div class="search1">
+                    <input type="text" name="search_block" id="search_block" class="form-control" placeholder="Поиск клиента" value="{{ request.GET.search_block }}">
+                    <ul id="search-res-blocks" class="list-group"></ul>
+                    <button type="submit" class="btn" style="background-color: #0288d1; color: white; border: none;
+                    width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;">
+                    <i class="fas fa-xmark"></i> <!-- Иконка сброса -->
+                    </button>
+                </div>
+                <div>
+                    <select name="choice_block" id="choice_block" class="form-select">
+                        <optgroup label="Показывать блоки ...">
+                            <option value="active" {% if request.GET.choice_block == "active" %}selected{% endif %}>Активные</option>
+                            <option value="completed" {% if request.GET.choice_block == "completed" %}selected{% endif %}>Завершённые</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div>
+                    <!-- Кнопка для открытия модального окна -->
+                    <a href="#addBlockModal" class="btn" data-bs-toggle="modal" data-bs-target="#addBlockModal"
+                       style="background-color: #0288d1; color: white; border: none; width: 40px; height: 40px; display: flex;
+                       justify-content: center; align-items: center;">
+                        <i class="fas fa-plus" style="font-size: 20px;"></i> <!-- Иконка плюса, можно настроить размер -->
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Список блоков -->
+    <div class="client-list">
+        {% for block in blocks %}
+            <div class="client-card mb-3 p-3" style="background-color: {% cycle '#f9f9f9' '#e9ecef' %}; cursor: pointer;" onclick="location.href='{% url 'client_detail' block.client.id %}'">
+                <div><strong>{{ block }}:</strong> {{ block.completed_meetings }} из {{ block.total_meetings }}</div>
+                <div>{% if block.client.metro != "яя" %}<strong>Метро:</strong> {{ block.client.metro }}{% endif %}{% if block.client.street != "яя" %}<strong> Адрес:</strong> улица {{ block.client.street }}, {% if block.client.house_number != "яя" %}дом {{ block.client.house_number }}, {% endif %}{% if block.client.entrance != "яя" %}подъезд {{ block.client.entrance }}, {% endif %}{% if block.client.floor != "яя" %}этаж {{ block.client.floor }}{% endif %}{% endif %}</div>
+            </div>
+            {% empty %}
+            <p>Блоки не найдены.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Модальное окно -->
+<div class="modal fade" id="addBlockModal" tabindex="-1" aria-labelledby="addBlockModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content custom-modal-content">
+            <div class="modal-header custom-modal-header">
+                <h5 class="modal-title" id="addBlockModalLabel">Добавить новый блок</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addBlockForm">
+                    <div class="mb-3">
+                        <label for="search_client_block" class="form-label">Клиент</label>
+                        <div style="position: relative;">
+                            <input type="text" name="search_client_block" id="search_client_block" class="form-control"
+                                   placeholder="Поиск клиента" value="{{ request.GET.search }}" required>
+                            <ul id="search-res" class="list-group"></ul>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="block_cost" class="form-label">Стоимость</label>
+                        <input type="number" id="block_cost" class="form-control" max="100000000" required>
+                    </div>
+                    <div class="mb-3 d-flex justify-content-between">
+                        <div style="flex: 1;">
+                            <label for="total_meetings" class="form-label">Количество встреч</label>
+                            <input type="number" id="total_meetings" class="form-control" style="width: 60px;" min="2" max="100" required>
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="completed_meetings" class="form-label">Из них проведено</label>
+                            <input type="number" id="completed_meetings" class="form-control" style="width: 60px;" value="0" min="0" max="100" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Добавить</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('search_client_block').addEventListener('input', function() {
+        const query = this.value;
+        const resultsContainer = document.getElementById('search-res');
+
+         // Если поле пустое, скрываем результаты
+        if (!query) {
+            resultsContainer.style.display = 'none';
+            return;
+        }
+
+        // Отправляем запрос на сервер для получения результатов автозаполнения
+        fetch(`/autocomplete/?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                resultsContainer.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(client => {
+                        const li = document.createElement('li');
+                        li.classList.add('list-group-item');
+                        li.textContent = client.name;
+
+                        li.addEventListener('click', () => {
+                            // Устанавливаем выбранное имя клиента в поле поиска
+                            document.getElementById('search_client_block').value = client.name;
+
+                            // Прячем список результатов
+                            resultsContainer.style.display = 'none';
+
+                            // Устанавливаем ID клиента в скрытое поле формы
+                            if (!document.getElementById('clientId')) {
+                                const hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name = 'client_id';
+                                hiddenInput.id = 'clientId';
+                                document.getElementById('addBlockForm').appendChild(hiddenInput);
+                            }
+                            document.getElementById('clientId').value = client.id;
+                        });
+                        resultsContainer.appendChild(li);
+                    });
+                    resultsContainer.style.display = 'block';
+                } else {
+                    resultsContainer.style.display = 'none';
+                }
+            });
+    });
+
+    // Отправка формы через AJAX
+    document.getElementById("addBlockForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        // Удаляем все предыдущие сообщения об ошибке
+        const errorMessages = this.querySelectorAll('.error-message');
+        errorMessages.forEach(error => error.remove());
+
+        const totalMeetings = parseInt(document.getElementById("total_meetings").value, 10);
+        const completedMeetings = parseInt(document.getElementById("completed_meetings").value, 10);
+        const blockCost = document.getElementById("block_cost").value;
+
+        const clientId = document.getElementById('clientId')?.value;
+        if (!clientId) {
+            addErrorMessage('search_client_block', 'Клиент не найден. Выберите клиента из списка.');
+            return;
+        }
+
+        if (isNaN(totalMeetings) || isNaN(completedMeetings) || completedMeetings > totalMeetings) {
+            addErrorMessage('completed_meetings', 'Количество больше общего числа.');
+            return;
+        }
+
+        if (completedMeetings == totalMeetings) {
+            addErrorMessage('completed_meetings', 'Количество равно числу встреч.');
+            return;
+        }
+
+        const formData = new FormData(this);
+        formData.append("total_meetings", totalMeetings);
+        formData.append("completed_meetings", completedMeetings);
+        formData.append("block_cost", blockCost);
+
+        fetch("{% url 'add_block' %}", {
+            method: "POST",
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Произошла ошибка при добавлении блока.');
+                }
+            })
+            .catch(error => {
+                alert("Произошла ошибка. Попробуйте еще раз.");
+            });
+    });
+
+    function addErrorMessage(inputId, message) {
+        const inputField = document.getElementById(inputId);
+        const errorMessage = document.createElement('div');
+        errorMessage.classList.add('error-message');
+        errorMessage.textContent = message;
+        errorMessage.style.color = 'red';
+        errorMessage.style.marginTop = '4px';
+        inputField.parentNode.insertBefore(errorMessage, inputField.nextSibling);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const addBlockModal = document.getElementById('addBlockModal');
+        const addBlockForm = document.getElementById('addBlockForm');
+
+        // Событие сброса формы при закрытии модального окна
+        addBlockModal.addEventListener('hidden.bs.modal', function () {
+            addBlockForm.reset();
+
+            // Удаление сообщений об ошибке
+            const errorMessages = addBlockForm.querySelectorAll('.error-message');
+            errorMessages.forEach(error => error.remove());
+
+
+            // Очистка результатов поиска
+            const searchResults = document.getElementById('search-res');
+            searchResults.innerHTML = '';
+            searchResults.style.display = 'none';
+        });
+    });
+</script>
+<script>
+    //JavaScript для автоматического применения фильтра статуса блока
+    document.getElementById('choice_block').addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
+    });
+</script>
+<script>
+    document.getElementById('search_block').addEventListener('input', function() {
+        const query = this.value;
+        const resultsContainer = document.getElementById('search-res-blocks');
+
+        // Если поле пустое, скрываем результаты
+        if (!query) {
+            resultsContainer.style.display = 'none';
+            return;
+        }
+
+    // Отправляем запрос на сервер для получения результатов автозаполнения
+    fetch(`/autocomplete/?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            resultsContainer.innerHTML = '';
+            if (data.length > 0) {
+                data.forEach(client => {
+                    const li = document.createElement('li');
+                    li.classList.add('list-group-item');
+
+                    // Проверяем, чтобы значения не были undefined
+                    const metro = client.metro ? `метро ${client.metro}` : '';
+                    const street = client.street ? `улица ${client.street}` : '';
+
+                    // Обновляем текст, показывая только если есть значения
+                    li.textContent = `${client.name}${metro ? ', ' + metro : ''}${street ? ', ' + street : ''}`;
+
+                    li.addEventListener('click', () => {
+                        // Используем ID клиента для поиска
+                        const clientId = client.id;
+
+
+                        // Формируем URL с ID клиента
+                        document.getElementById('search_block').value = client.name;
+                        window.location.href = `?client_id=${clientId}`;
+
+                        // Перенаправляем на URL
+                        window.location.href = searchUrl;
+
+                    });
+                    resultsContainer.appendChild(li);
+                });
+                resultsContainer.style.display = 'block';
+            } else {
+                resultsContainer.style.display = 'none';
+            }
+        });
+});
+</script>
 {% endblock %}

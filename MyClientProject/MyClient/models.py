@@ -34,6 +34,7 @@ class Schedule(models.Model):
     is_online = models.BooleanField("Онлайн", default=False)
     is_completed = models.BooleanField("Выполнено", default=False)
     is_paid = models.BooleanField("Оплачено", default=False)
+    is_canceled = models.BooleanField("Отменено", default=False)
     cost = models.DecimalField("Стоимость", max_digits=10, decimal_places=2)
 
     def get_plan(self):
@@ -44,6 +45,64 @@ class Schedule(models.Model):
 
     def get_paid(self):
         return float(self.cost) if self.is_paid else 0
+
+    def get_cancel(self):
+        return float(self.cost) if self.is_canceled else 0
+
+
+class Block(models.Model):
+    STATUS_CHOICES = [
+        ('active', 'Активный'),
+        ('completed', 'Завершённый'),
+    ]
+
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='blocks', verbose_name="Клиент")
+    block_number = models.PositiveIntegerField("Номер блока")
+    total_meetings = models.PositiveIntegerField("Количество встреч в блоке")
+    completed_meetings = models.PositiveIntegerField("Пройденные встречи", default=0)
+    cost = models.DecimalField("Стоимость блока", max_digits=10, decimal_places=2)
+    status = models.CharField("Статус блока", max_length=10, choices=STATUS_CHOICES, default='active')
+
+    class Meta:
+        unique_together = ('client', 'block_number')  # Каждый блок уникален для клиента
+        ordering = ['client', 'block_number']
+        verbose_name = "Блок встреч"
+        verbose_name_plural = "Блоки встреч"
+
+    def __str__(self):
+        client_name = str(self.client).removesuffix(" яя")
+        return f"{client_name}. Блок {self.block_number}"
+
+    def save(self, *args, **kwargs):
+        previous_status = self.status
+        # Автоматическое обновление статуса
+        if self.completed_meetings >= self.total_meetings:
+            self.status = 'completed'
+        super().save(*args, **kwargs)
+
+    @staticmethod
+    def create_block(client, total_meetings, completed_meetings, cost):
+        """
+        Удобный метод для создания нового блока.
+        """
+        last_block = Block.objects.filter(client=client).order_by('block_number').last()
+        block_number = last_block.block_number + 1 if last_block else 1
+        return Block.objects.create(
+            client=client,
+            block_number=block_number,
+            completed_meetings=completed_meetings,
+            total_meetings=total_meetings,
+            cost=cost
+        )
+
+    def increment_completed_meetings(self):
+        """
+        Увеличивает количество завершённых встреч на 1.
+        """
+        if self.status == 'completed':
+            raise ValueError("Блок уже завершён.")
+        self.completed_meetings += 1
+        self.save()
 
 
 class Profile(models.Model):
@@ -71,13 +130,4 @@ class ScheduleAnalytics:
     def __init__(self, schedules):
         self.schedules = schedules
 
-    def get_totals_by_date(self):
-        totals = {}
-        for schedule in self.schedules:
-            date = schedule.date
-            if date not in totals:
-                totals[date] = {'plan': 0, 'due': 0, 'paid': 0}
-            totals[date]['plan'] += schedule.get_plan()
-            totals[date]['due'] += schedule.get_due()
-            totals[date]['paid'] += schedule.get_paid()
-        return totals
+
