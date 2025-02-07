@@ -1,0 +1,282 @@
+<!-- MyClient/templates/MyClient/block_detail.html -->
+
+{% extends 'base.html' %}
+{% block title %}Детали блока{% endblock %}
+{% block content %}
+
+<!-- Модальное окно -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content custom-modal-content">
+            <div class="modal-header custom-modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить блок?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Нет</button>
+                <form method="post" action="{% url 'delete_block' blocks.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Да</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="profile-client">
+    <h2>{{ client.first_name }}{% if client.last_name != "яя" %} {{ client.last_name }}{% endif %}</h2>
+    {% if client.metro != "яя" %}<p><strong>Метро:</strong> {{ client.metro }}</p>{% endif %}
+    {% if client.street != "яя" %}<p><strong>Адрес:</strong> улица {{ client.street }},{% if client.house_number != "яя" %} дом {{ client.house_number }},{% endif %}{% if client.entrance != "яя" %} подъезд {{ client.entrance }},{% endif %}{% if client.floor != "яя" %} этаж {{ client.floor }},{% endif %}{% if client.intercom != "яя" %} домофон {{ client.intercom }}{% endif %}</p>{% endif %}
+    {% if client.phone != "яя" %}<p><strong>Телефон:</strong> {{ client.phone }}</p>{% endif %}
+    <div style="box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15); border-radius: 10px; padding: 0 20px 0 20px; margin-bottom: 15px;">
+        <div class="client-settings">
+            <p><strong>Номер блока:</strong> {{ blocks.block_number }}</p>
+            <p><strong>Количество встреч в блоке:</strong> {{ blocks.completed_meetings }} / {{ blocks.total_meetings }}</p>
+            <p><strong>Стоимость блока:</strong> {{ blocks.cost|stringformat:'.f' }}</p>
+            <p><strong>Стоимость встречи:</strong> {{ cost_per_meeting|stringformat:'.f' }}</p>
+        </div>
+    </div>
+    <div class="client-settings">
+        <a id="backBtn" class="back-btn">
+            <i class="fa fa-arrow-left"></i> <!-- Иконка стрелочки назад -->
+        </a>
+        <div class="settings-buttons">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editBlockModal">
+                Редактировать
+            </button>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+                Удалить блок
+            </button>
+        </div>
+        {% block extra_content %}
+        {% endblock %}
+    </div>
+</div>
+
+<!-- Модальное окно редактирования встречи -->
+<div class="modal fade" id="editBlockModal" tabindex="-1" aria-labelledby="editBlockModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content custom-modal-content">
+            <div class="modal-header custom-modal-header">
+                <h5 class="modal-title" id="editBlockModalLabel">Редактировать блок</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editBlockForm" method="post" action="{% url 'edit_block' blocks.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="search_client_block" class="form-label">Клиент</label>
+                        <div style="position: relative;">
+                            <input type="text" name="search_client_block" id="search_client_block" class="form-control"
+                                   placeholder="Поиск клиента" value="{{ request.GET.search|default:client }}" required>
+                            <ul id="search-res" class="list-group"></ul>
+                        </div>
+                    </div>
+                    <input type="hidden" id="currentClientId" name="current_client_id" value="{{ client.id }}">
+                    <input type="hidden" id="currentClient" name="current_client" value="{{ client }}">
+                    <div class="mb-3">
+                        <label for="block_cost" class="form-label">Стоимость</label>
+                        <input type="number" id="block_cost" class="form-control" max="100000000"
+                               value="{{ blocks.cost|stringformat:'.f' }}" required>
+                    </div>
+                    <div class="mb-3 d-flex justify-content-between">
+                        <div style="flex: 1;">
+                            <label for="total_meetings" class="form-label">Количество встреч</label>
+                            <input type="number" id="total_meetings" class="form-control" style="width: 60px;"
+                                   min="2" max="100" value="{{ blocks.total_meetings|stringformat:'.f' }}" required>
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="completed_meetings" class="form-label">Из них проведено</label>
+                            <input type="number" id="completed_meetings" class="form-control" style="width: 60px;"
+                                   value="{{ blocks.completed_meetings|stringformat:'.f' }}" min="0" max="100" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('search_client_block').addEventListener('input', function() {
+        const query = this.value;
+        const resultsContainer = document.getElementById('search-res');
+
+         // Если поле пустое, скрываем результаты
+        if (!query) {
+            resultsContainer.style.display = 'none';
+            return;
+        }
+
+        // Отправляем запрос на сервер для получения результатов автозаполнения
+        fetch(`/autocomplete/?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                resultsContainer.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(client => {
+                        const li = document.createElement('li');
+                        li.classList.add('list-group-item');
+                        li.textContent = client.name;
+
+                        li.addEventListener('click', () => {
+                            // Устанавливаем выбранное имя клиента в поле поиска
+                            document.getElementById('search_client_block').value = client.name;
+
+                            // Прячем список результатов
+                            resultsContainer.style.display = 'none';
+
+                            // Устанавливаем ID клиента в скрытое поле формы
+                            if (!document.getElementById('clientId')) {
+                                const hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name = 'client_id';
+                                hiddenInput.id = 'clientId';
+                                document.getElementById('editBlockForm').appendChild(hiddenInput);
+                            }
+                            document.getElementById('clientId').value = client.id;
+                        });
+                        resultsContainer.appendChild(li);
+                    });
+                    resultsContainer.style.display = 'block';
+                } else {
+                    resultsContainer.style.display = 'none';
+                }
+            });
+    });
+
+    // Отправка формы через AJAX
+    document.getElementById('editBlockForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Предотвращение стандартной отправки формы
+        const formData = new FormData(this);
+        let clientID = document.getElementById("clientId")?.value;
+
+
+        // Удаляем все предыдущие сообщения об ошибке
+        const errorMessages = this.querySelectorAll('.client-error');
+        errorMessages.forEach(error => error.remove());
+
+
+        // Если clientID отсутствует, используем текущее значение client.id
+        if (!clientID) {
+            clientID = document.getElementById("currentClientId").value; // Скрытое поле с текущим клиентом
+        }
+
+        if (document.getElementById('search_client_block').value != document.getElementById('currentClient').value) {
+            if (document.getElementById("currentClientId").value == clientID) {
+                addErrorMessage('search_client_block', 'Клиент не найден. Выберите клиента из списка.');
+                return;
+            }
+        }
+            const totalMeetings = parseInt(document.getElementById("total_meetings").value, 10);
+            const completedMeetings = parseInt(document.getElementById("completed_meetings").value, 10);
+            const blockCost = document.getElementById("block_cost").value;
+
+            if (isNaN(totalMeetings) || isNaN(completedMeetings) || completedMeetings > totalMeetings) {
+                addErrorMessage('completed_meetings', 'Количество больше общего числа.');
+                return;
+            }
+
+            if (completedMeetings == totalMeetings) {
+                addErrorMessage('completed_meetings', 'Количество равно числу встреч.');
+                return;
+            }
+
+            formData.append("total_meetings", totalMeetings);
+            formData.append("completed_meetings", completedMeetings);
+            formData.append("block_cost", blockCost);
+            formData.append("client_id", clientID);
+
+            fetch("{% url 'edit_block' blocks.id %}", {
+                method: "POST",
+                body: formData,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Произошла ошибка при добавлении блока.');
+                    }
+                })
+                .catch(error => {
+                    alert("Произошла ошибка. Попробуйте еще раз.");
+                });
+        });
+
+    function addErrorMessage(inputId, message) {
+        const inputField = document.getElementById(inputId);
+        const errorMessage = document.createElement('div');
+        errorMessage.classList.add('client-error');
+        errorMessage.textContent = message;
+        errorMessage.style.color = 'red';
+        errorMessage.style.marginTop = '4px';
+        inputField.parentNode.insertBefore(errorMessage, inputField.nextSibling);
+    }
+});
+
+    const editBlockModal = document.getElementById('editBlockModal');
+    const editBlockForm = document.getElementById('editBlockForm');
+
+    // Событие сброса формы при закрытии модального окна
+    editBlockModal.addEventListener('hidden.bs.modal', function () {
+        editBlockForm.reset();
+
+        // Удаление сообщений об ошибке
+        const errorMessages = addBlockForm.querySelectorAll('.client-error');
+        errorMessages.forEach(error => error.remove());
+
+        // Очистка результатов поиска
+        const searchResults = document.getElementById('search-res');
+        searchResults.innerHTML = '';
+        searchResults.style.display = 'none';
+    });
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('editBlockModal');
+    const ending = ' яя';
+
+    // Обработчик для события показа модального окна
+    modal.addEventListener('show.bs.modal', function() {
+        const searchInput = document.getElementById('search_client_block');
+        if (searchInput && searchInput.value.endsWith(ending)) {
+            searchInput.value = searchInput.value.slice(0, -ending.length);
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const currentClientInput = document.getElementById('currentClient');
+    const ending = ' яя';
+
+    if (currentClientInput && currentClientInput.value.endsWith(ending)) {
+        currentClientInput.value = currentClientInput.value.slice(0, -ending.length);
+    }
+});
+
+// Проверяем, была ли текущая страница перезагружена
+const backBtn = document.getElementById('backBtn');
+const wasReloaded = performance.getEntriesByType('navigation')[0]?.type === 'reload';
+
+backBtn.addEventListener('click', (event) => {
+    event.preventDefault(); // Останавливаем стандартное действие
+
+    if (wasReloaded) {
+        // Если страница была перезагружена, перенаправляем
+        window.location.href = '/blocks';
+    } else {
+        // Иначе используем history.back()
+        history.back();
+    }
+});
+</script>
+
+{% endblock %}

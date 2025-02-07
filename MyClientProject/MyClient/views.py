@@ -384,6 +384,50 @@ def add_block(request):
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
+
+def block_detail(request, block_id):
+    blocks = get_object_or_404(Block, id=block_id)
+
+    cost_per_meeting = blocks.cost / blocks.total_meetings if blocks.total_meetings > 0 else 0
+    clients = Client.objects.all()
+
+    context = {
+        'blocks': blocks,
+        'client': blocks.client,
+        'clients': clients,
+        'cost_per_meeting': cost_per_meeting
+    }
+    return render(request, 'MyClient/block_detail.html', context)
+
+
+@login_required
+@csrf_exempt
+def edit_block(request, block_id):
+    if request.method == "POST":
+        block = get_object_or_404(Block, id=block_id)
+        block.client_id = request.POST.get('client_id')
+        block.total_meetings = int(request.POST.get('total_meetings', 0))
+        block.completed_meetings = int(request.POST.get('completed_meetings', 0))
+        block.cost = request.POST.get('block_cost')
+
+        # Проверка входных данных
+        if block.completed_meetings > block.total_meetings:
+            return JsonResponse({'success': False,
+                                 'error': 'Количество завершенных встреч не может превышать общее количество встреч.'})
+
+        block.save()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
+def delete_block(request, block_id):
+    block = get_object_or_404(Block, id=block_id)
+    if request.method == "POST":
+        block.delete()
+        return redirect('blocks')
+    return redirect('block_detail', block_id=block_id)
+
+
 def autocomplete_clients(request):
     """Автозаполнение для поиска клиентов."""
     query = request.GET.get('query', '')

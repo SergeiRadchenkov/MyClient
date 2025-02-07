@@ -41,7 +41,7 @@
     <!-- Список блоков -->
     <div class="client-list">
         {% for block in blocks %}
-            <div class="client-card mb-3 p-3" style="background-color: {% cycle '#f9f9f9' '#e9ecef' %}; cursor: pointer;" onclick="location.href='{% url 'client_detail' block.client.id %}'">
+            <div class="client-card mb-3 p-3" style="background-color: {% cycle '#f9f9f9' '#e9ecef' %}; cursor: pointer;" onclick="location.href='{% url 'block_detail' block.id %}'">
                 <div><strong>{{ block }}:</strong> {{ block.completed_meetings }} из {{ block.total_meetings }}</div>
                 <div>{% if block.client.metro != "яя" %}<strong>Метро:</strong> {{ block.client.metro }}{% endif %}{% if block.client.street != "яя" %}<strong> Адрес:</strong> улица {{ block.client.street }}, {% if block.client.house_number != "яя" %}дом {{ block.client.house_number }}, {% endif %}{% if block.client.entrance != "яя" %}подъезд {{ block.client.entrance }}, {% endif %}{% if block.client.floor != "яя" %}этаж {{ block.client.floor }}{% endif %}{% endif %}</div>
             </div>
@@ -92,7 +92,6 @@
         </div>
     </div>
 </div>
-
 <script>
     document.getElementById('search_client_block').addEventListener('input', function() {
         const query = this.value;

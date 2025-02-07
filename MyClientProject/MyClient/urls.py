@@ -32,4 +32,7 @@ urlpatterns = [
     path('schedule/pay/<int:schedule_id>/', views.pay_schedule, name='pay_schedule'),
     path('schedule/cancel/<int:schedule_id>/', views.cancel_schedule, name='pay_schedule'),
     path('add_block/', views.add_block, name='add_block'),
+    path('block/<int:block_id>/', views.block_detail, name='block_detail'),
+    path('delete_block/<int:block_id>/', views.delete_block, name='delete_block'),
+    path('edit_block/<int:block_id>/', views.edit_block, name='edit_block'),
 ]
