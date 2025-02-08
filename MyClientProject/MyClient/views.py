@@ -14,7 +14,25 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 from datetime import date, timedelta, datetime
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import F
+from django.db.models import F, Sum, Count, Q
+from django.utils import timezone
+from dateutil.relativedelta import relativedelta
+
+
+months = {
+    "January": "Январь",
+    "February": "Февраль",
+    "March": "Март",
+    "April": "Апрель",
+    "May": "Май",
+    "June": "Июнь",
+    "July": "Июль",
+    "August": "Август",
+    "September": "Сентябрь",
+    "October": "Октябрь",
+    "November": "Ноябрь",
+    "December": "Декабрь",
+}
 
 
 @login_required
@@ -338,6 +356,31 @@ def profile(request):
         # Создаем профиль, если его нет
         Profile.objects.create(user=user)
     profile = user.profile  # Связанный профиль
+
+    today = timezone.now().date()
+
+    # Незавершенные встречи
+    unfinished_meetings = Schedule.objects.filter(
+        date__lt=today
+    ).exclude(
+        Q(is_paid=True) | Q(is_canceled=True)
+    ).select_related('client')
+
+    # Периоды для анализа
+    periods = [
+        get_week_stats(),
+        get_month_stats(),
+        get_previous_month_stats()
+    ]
+
+    # Общая статистика
+    lifetime_stats = Schedule.objects.aggregate(
+        completed=Count('id', filter=Q(is_completed=True)),
+        total_paid=Sum('cost', filter=Q(is_paid=True)),
+        blocks_paid=Sum('block__cost', filter=Q(block__isnull=False)),
+        cancelled=Count('id', filter=Q(is_canceled=True))
+    )
+
     context = {
         'first_name': user.first_name,
         'last_name': user.last_name,
@@ -345,8 +388,120 @@ def profile(request):
         'email': user.email,  # Используем email
         'profile': profile,
         'show_settings_btn': True,  # Шестерёнка видна
+        'unfinished_meetings': unfinished_meetings,
+        'periods': periods,
+        'lifetime_stats': lifetime_stats,
     }
     return render(request, 'MyClient/profile.html', context)
+
+
+def get_month_stats():
+    today = timezone.now().date()
+    first_day_of_month = today.replace(day=1)
+    last_day_of_month = today + relativedelta(day=31)
+
+    # Фильтр для текущего месяца (с 1 числа до текущего дня)
+    month_filter = Q(date__gte=first_day_of_month) & Q(date__lte=today)
+
+    # Основная статистика
+    stats = Schedule.objects.filter(month_filter).aggregate(
+        completed=Count('id', filter=Q(is_completed=True)),
+        total_paid=Sum('cost', filter=Q(is_paid=True)),
+        blocks_paid=Sum('block__cost', filter=Q(block__isnull=False, is_paid=True)),
+        cancelled=Count('id', filter=Q(is_canceled=True))
+    )
+
+    # Статистика по клиентам
+    clients_stats = Schedule.objects.filter(month_filter).values(
+        'client__first_name', 'client__last_name'
+    ).annotate(
+        completed=Count('id', filter=Q(is_completed=True)),
+        cancelled=Count('id', filter=Q(is_canceled=True))
+    ).order_by('-completed')
+
+    return {
+        'title': f'Текущий месяц ({months[first_day_of_month.strftime("%B")]})',
+        'completed': stats['completed'] or 0,
+        'total_paid': stats['total_paid'] or 0,
+        'blocks_paid': stats['blocks_paid'] or 0,
+        'cancelled': stats['cancelled'] or 0,
+        'clients_stats': [{
+            'name': f"{c['client__first_name']} {c['client__last_name']}".strip(),
+            'completed': c['completed'],
+            'cancelled': c['cancelled']
+        } for c in clients_stats]
+    }
+
+
+def get_previous_month_stats():
+    today = timezone.now().date()
+    first_day_prev_month = (today - relativedelta(months=1)).replace(day=1)
+    last_day_prev_month = first_day_prev_month + relativedelta(day=31)
+
+    # Фильтр для прошлого месяца (весь месяц)
+    prev_month_filter = Q(date__gte=first_day_prev_month) & Q(date__lte=last_day_prev_month)
+
+    # Основная статистика
+    stats = Schedule.objects.filter(prev_month_filter).aggregate(
+        completed=Count('id', filter=Q(is_completed=True)),
+        total_paid=Sum('cost', filter=Q(is_paid=True)),
+        blocks_paid=Sum('block__cost', filter=Q(block__isnull=False, is_paid=True)),
+        cancelled=Count('id', filter=Q(is_canceled=True))
+    )
+
+    # Статистика по клиентам
+    clients_stats = Schedule.objects.filter(prev_month_filter).values(
+        'client__first_name', 'client__last_name'
+    ).annotate(
+        completed=Count('id', filter=Q(is_completed=True)),
+        cancelled=Count('id', filter=Q(is_canceled=True))
+    ).order_by('-completed')
+
+    return {
+        'title': f'Текущий месяц ({months[first_day_prev_month.strftime("%B")]})',
+        'completed': stats['completed'] or 0,
+        'total_paid': stats['total_paid'] or 0,
+        'blocks_paid': stats['blocks_paid'] or 0,
+        'cancelled': stats['cancelled'] or 0,
+        'clients_stats': [{
+            'name': f"{c['client__first_name']} {c['client__last_name']}".strip(),
+            'completed': c['completed'],
+            'cancelled': c['cancelled']
+        } for c in clients_stats]
+    }
+
+
+def get_week_stats():
+    today = timezone.now().date()
+    week_ago = today - timedelta(days=7)
+
+    stats = Schedule.objects.filter(
+        date__range=[week_ago, today - timedelta(days=1)]
+    ).aggregate(
+        completed=Count('id', filter=Q(is_completed=True)),
+        total_paid=Sum('cost', filter=Q(is_paid=True)),
+        blocks_paid=Sum('block__cost', filter=Q(block__isnull=False)),
+        cancelled=Count('id', filter=Q(is_canceled=True))
+    )
+
+    clients_stats = Schedule.objects.filter(
+        date__range=[week_ago, today - timedelta(days=1)]
+    ).values(
+        'client__first_name', 'client__last_name'
+    ).annotate(
+        completed=Count('id', filter=Q(is_completed=True)),
+        cancelled=Count('id', filter=Q(is_canceled=True))
+    )
+
+    return {
+        'title': 'Последняя неделя',
+        **stats,
+        'clients_stats': [{
+            'name': f"{c['client__first_name']} {c['client__last_name']}".strip(),
+            'completed': c['completed'],
+            'cancelled': c['cancelled']
+        } for c in clients_stats]
+    }
 
 
 @login_required

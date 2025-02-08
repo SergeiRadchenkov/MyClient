@@ -681,3 +681,73 @@ input[type="date"] {
 .btn-group-sm>.btn, .btn-sm {
     --bs-btn-font-size: 0.75rem;
 }
+
+.analytics-container {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.analytics-block {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-item {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.clients-stats {
+    display: grid;
+    gap: 1rem;
+}
+
+.client-stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.meetings-list {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.meeting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.status-badges {
+    display: flex;
+    gap: 0.5rem;
+}
+</style>

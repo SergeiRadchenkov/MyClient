@@ -39,9 +39,95 @@
         <a href="{% url 'settings' %}" class="settings-btn">
             <i class="fa fa-cogs"></i> <!-- Иконка шестерёнки -->
         </a>
+</div>
     {% endif %}
-    <!-- Дополнительный контент для расширения -->
-    {% block extra_content %}
-    {% endblock %}
+{% block extra_content %}
+
+<!-- Блоки аналитики -->
+<div class="analytics-container">
+    <!-- Незавершенные встречи -->
+    <div class="analytics-block">
+        <p><strong>Незавершенные встречи</strong></p>
+        {% if unfinished_meetings %}
+            <div class="meetings-list">
+                {% for meeting in unfinished_meetings %}
+                <div class="meeting-item">
+                    <div>{{ meeting.date }} {{ meeting.time }} - {{ meeting.client }}</div>
+                    <div class="status-badges">
+                        {% if not meeting.is_paid %}<span class="badge bg-warning">Не оплачено</span>{% endif %}
+                        {% if not meeting.is_canceled %}<span class="badge bg-danger">Активно</span>{% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Нет незавершенных встреч</p>
+        {% endif %}
+    </div>
+
+    <!-- Статистические блоки -->
+    {% for period in periods %}
+    <div class="analytics-block">
+        <p><strong>{{ period.title }}</strong></p>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-label">Завершено встреч:</span>
+                <span class="stat-value">{{ period.completed }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Сумма оплат:</span>
+                <span class="stat-value">{{ period.total_paid|default:0  }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Оплачено блоков:</span>
+                <span class="stat-value">{{ period.blocks_paid|default:0  }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Отмены:</span>
+                <span class="stat-value">{{ period.cancelled }}</span>
+            </div>
+        </div>
+
+        <div class="clients-stats">
+            {% for client in period.clients_stats %}
+            <div class="client-stat">
+                <div class="client-name">{{ client.name }}</div>
+                <div class="client-numbers">
+                    <span>Встреч: {{ client.completed }}</span>
+                    <span>Отмен: {{ client.cancelled }}</span>
+                </div>
+            </div>
+            {% empty %}
+            <p>Нет данных о клиентах</p>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Общая статистика -->
+    <div class="analytics-block">
+        <p><strong>Вся статистика</strong></p>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-label">Всего завершено:</span>
+                <span class="stat-value">{{ lifetime_stats.completed }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Общая сумма оплат:</span>
+                <span class="stat-value">{{ lifetime_stats.total_paid|default:0 }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Всего блоков:</span>
+                <span class="stat-value">{{ lifetime_stats.blocks_paid|default:0 }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Всего отмен:</span>
+                <span class="stat-value">{{ lifetime_stats.cancelled }}</span>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
+{% endblock %}
+
+
