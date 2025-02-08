@@ -14,6 +14,7 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 from datetime import date, timedelta, datetime
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import F
 
 
 @login_required
@@ -105,11 +106,28 @@ def pay_schedule(request, schedule_id):
     if request.method == 'POST':
         try:
             schedule = get_object_or_404(Schedule, id=schedule_id)
-            schedule.is_paid = not schedule.is_paid  # Переключаем состояние
+            new_paid_status = not schedule.is_paid
+
+            # Принудительно обновляем блок только при установке оплаты
+            if new_paid_status:
+                active_block = Block.objects.filter(
+                    client=schedule.client,
+                    status='active'
+                ).order_by('block_number').first()
+
+                schedule.block = active_block
+
+            schedule.is_paid = new_paid_status
             schedule.save()
-            return JsonResponse({'status': 'success', 'is_paid': schedule.is_paid})
+
+            return JsonResponse({
+                'status': 'success',
+                'is_paid': schedule.is_paid,
+                'block_id': schedule.block.id if schedule.block else None
+            })
+
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': 'Schedule not found'}, status=404)
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 
@@ -334,7 +352,6 @@ def profile(request):
 @login_required
 def blocks(request):
     choice_filter = request.GET.get('choice_block', 'active')
-
     client_id = request.GET.get('client_id')
 
     # Фильтрация блоков
@@ -346,6 +363,12 @@ def blocks(request):
         blocks = blocks.filter(status='active')
     elif choice_filter == 'completed':
         blocks = blocks.filter(status='completed')
+
+    # Сортировка блоков по дате создания (новые сверху)
+    blocks = blocks.order_by('-id')
+
+    # Ограничение количества блоков на странице (не более 30)
+    blocks = blocks[:30]
 
     context = {
         'blocks': blocks,
@@ -726,3 +749,17 @@ def delete_schedule(request, schedule_id):
         schedule.delete()
         return redirect('schedule')
     return redirect('schedule_detail', schedule_id=schedule_id)
+
+
+def check_client_block(request, client_id):
+    try:
+        client = Client.objects.get(id=client_id)
+        has_block = Block.objects.filter(
+            client=client,
+            status='active',
+            completed_meetings__lt=F('total_meetings')
+        ).exists()
+        return JsonResponse({'has_block': has_block})
+    except Client.DoesNotExist:
+        return JsonResponse({'error': 'Client not found'}, status=404)
+

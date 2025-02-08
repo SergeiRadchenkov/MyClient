@@ -35,4 +35,5 @@ urlpatterns = [
     path('block/<int:block_id>/', views.block_detail, name='block_detail'),
     path('delete_block/<int:block_id>/', views.delete_block, name='delete_block'),
     path('edit_block/<int:block_id>/', views.edit_block, name='edit_block'),
+    path('check_client_block/<int:client_id>/', views.check_client_block, name='check_client_block'),
 ]

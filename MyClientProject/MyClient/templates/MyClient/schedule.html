@@ -117,6 +117,8 @@
                     <div class="mb-3">
                         <label for="is_online" class="form-label">Онлайн</label>
                         <input type="checkbox" id="is_online" name="is_online" class="form-check-input">
+                        <label for="is_block_payment" class="form-label ms-3">Оплата блоком</label>
+                        <input type="checkbox" id="is_block_payment" name="is_block_payment" class="form-check-input">
                     </div>
                     <div class="mb-3 d-flex justify-content-between">
                         <div style="flex: 1;">
@@ -156,6 +158,7 @@ $('#addScheduleModal').on('show.bs.modal', function(event) {
 });
 </script>
 <script>
+document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('search_client').addEventListener('input', function() {
         const query = this.value;
         const resultsContainer = document.getElementById('search-res');
@@ -194,12 +197,27 @@ $('#addScheduleModal').on('show.bs.modal', function(event) {
                             }
                             document.getElementById('clientId').value = client.id;
 
-                            // Загружаем стоимость клиента
-                            fetch(`/get_client_cost/${client.id}/`)
+                            // Проверка активного блока
+                            fetch(`/check_client_block/${client.id}/`)
                                 .then(response => response.json())
                                 .then(data => {
-                                    const isOnline = document.getElementById("is_online").checked;
-                                    document.getElementById('schedule_cost').value = isOnline ? data.price_online : data.price_offline;
+                                    const blockCheckbox = document.getElementById('is_block_payment');
+                                    const costInput = document.getElementById('schedule_cost');
+
+                                    if (data.has_block) {
+                                        blockCheckbox.checked = true;
+                                        costInput.value = 0;
+                                        costInput.readOnly = true;
+                                    } else {
+                                        blockCheckbox.checked = false;
+                                        costInput.readOnly = false;
+                                        const isOnline = document.getElementById("is_online").checked;
+                                        fetch(`/get_client_cost/${client.id}/`)
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                costInput.value = isOnline ? data.price_online : data.price_offline;
+                                            });
+                                    }
                                 });
                         });
                         resultsContainer.appendChild(li);
@@ -211,16 +229,50 @@ $('#addScheduleModal').on('show.bs.modal', function(event) {
             });
     });
 
-    // Слушатель для изменения онлайн/оффлайн и пересчета стоимости
-    document.getElementById("is_online").addEventListener("change", function() {
+    // Обработчик для чекбокса "Оплата блоком"
+    document.getElementById('is_block_payment').addEventListener('change', function() {
+        const costInput = document.getElementById('schedule_cost');
         const clientId = document.getElementById('clientId')?.value;
 
-        if (clientId) {
+        if (this.checked) {
+            if (clientId) {
+                fetch(`/check_client_block/${clientId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.has_block) {
+                            this.checked = false;
+                            alert('У клиента нет активных блоков!');
+                            return;
+                        }
+                        costInput.value = 0;
+                        costInput.readOnly = true;
+                    });
+            }
+        } else {
+            costInput.readOnly = false;
+            if (clientId) {
+                fetch(`/get_client_cost/${clientId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const isOnline = document.getElementById("is_online").checked;
+                        costInput.value = isOnline ? data.price_online : data.price_offline;
+                    });
+            }
+        }
+    });
+
+    // Обновление стоимости при изменении онлайн/оффлайн
+    document.getElementById("is_online").addEventListener("change", function() {
+        const clientId = document.getElementById('clientId')?.value;
+        const blockCheckbox = document.getElementById('is_block_payment');
+
+        if (clientId && !blockCheckbox.checked) {
             fetch(`/get_client_cost/${clientId}/`)
                 .then(response => response.json())
                 .then(data => {
-                    const isOnline = document.getElementById("is_online").checked;
-                    document.getElementById('schedule_cost').value = isOnline ? data.price_online : data.price_offline;
+                    document.getElementById('schedule_cost').value = this.checked
+                        ? data.price_online
+                        : data.price_offline;
                 });
         }
     });
@@ -306,6 +358,7 @@ $('#addScheduleModal').on('show.bs.modal', function(event) {
         // Отправляем форму с выбранной датой
         document.getElementById('filterForm').submit();
     });
+});
 </script>
 <script>
     document.getElementById('search_schedules').addEventListener('input', function() {
@@ -490,6 +543,7 @@ $('#addScheduleModal').on('show.bs.modal', function(event) {
         });
     });
 </script>
+
 {% endblock %}
 
 

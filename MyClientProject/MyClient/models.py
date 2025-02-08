@@ -2,7 +2,7 @@
 from django.db import models
 from django.utils.timezone import now
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 
@@ -25,29 +25,6 @@ class Client(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
-
-
-class Schedule(models.Model):
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='schedules')
-    date = models.DateField("Дата", default=now)
-    time = models.TimeField("Время")
-    is_online = models.BooleanField("Онлайн", default=False)
-    is_completed = models.BooleanField("Выполнено", default=False)
-    is_paid = models.BooleanField("Оплачено", default=False)
-    is_canceled = models.BooleanField("Отменено", default=False)
-    cost = models.DecimalField("Стоимость", max_digits=10, decimal_places=2)
-
-    def get_plan(self):
-        return float(self.cost)
-
-    def get_due(self):
-        return float(self.cost) if self.is_completed and not self.is_paid else 0
-
-    def get_paid(self):
-        return float(self.cost) if self.is_paid else 0
-
-    def get_cancel(self):
-        return float(self.cost) if self.is_canceled else 0
 
 
 class Block(models.Model):
@@ -74,10 +51,12 @@ class Block(models.Model):
         return f"{client_name}. Блок {self.block_number}"
 
     def save(self, *args, **kwargs):
-        previous_status = self.status
-        # Автоматическое обновление статуса
+        # Автоматическое закрытие блока
         if self.completed_meetings >= self.total_meetings:
             self.status = 'completed'
+        elif self.status == 'completed' and self.completed_meetings < self.total_meetings:
+            self.status = 'active'
+
         super().save(*args, **kwargs)
 
     @staticmethod
@@ -95,14 +74,71 @@ class Block(models.Model):
             cost=cost
         )
 
-    def increment_completed_meetings(self):
-        """
-        Увеличивает количество завершённых встреч на 1.
-        """
-        if self.status == 'completed':
-            raise ValueError("Блок уже завершён.")
-        self.completed_meetings += 1
-        self.save()
+
+class Schedule(models.Model):
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='schedules')
+    date = models.DateField("Дата", default=now)
+    time = models.TimeField("Время")
+    is_online = models.BooleanField("Онлайн", default=False)
+    is_completed = models.BooleanField("Выполнено", default=False)
+    is_paid = models.BooleanField("Оплачено", default=False)
+    is_canceled = models.BooleanField("Отменено", default=False)
+    cost = models.DecimalField("Стоимость", max_digits=10, decimal_places=2)
+    block = models.ForeignKey(Block, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Привязанный блок"
+    )
+
+    def get_plan(self):
+        return float(self.cost)
+
+    def get_due(self):
+        return float(self.cost) if self.is_completed and not self.is_paid else 0
+
+    def get_paid(self):
+        return float(self.cost) if self.is_paid else 0
+
+    def get_cancel(self):
+        return float(self.cost) if self.is_canceled else 0
+
+
+@receiver(pre_save, sender=Schedule)
+def track_paid_changes(sender, instance, **kwargs):
+    if instance.id:
+        try:
+            old_instance = Schedule.objects.get(id=instance.id)
+            instance._old_is_paid = old_instance.is_paid
+            instance._old_block = old_instance.block  # Сохраняем предыдущий блок
+        except Schedule.DoesNotExist:
+            instance._old_is_paid = False
+            instance._old_block = None
+
+@receiver(post_save, sender=Schedule)
+def handle_paid_status(sender, instance, **kwargs):
+    old_is_paid = getattr(instance, '_old_is_paid', False)
+    new_is_paid = instance.is_paid
+    old_block = getattr(instance, '_old_block', None)
+
+    # Если статус оплаты изменился
+    if old_is_paid != new_is_paid:
+        if new_is_paid:
+            # Поиск активного блока с наименьшим номером
+            active_block = Block.objects.filter(
+                client=instance.client,
+                status='active'
+            ).order_by('block_number').first()
+
+            if active_block:
+                instance.block = active_block
+                active_block.completed_meetings += 1
+                active_block.save()
+                instance.save()  # Сохраняем привязку к блоку
+
+        else:
+            # Отвязываем от предыдущего блока и уменьшаем счетчик
+            if old_block:
+                old_block.completed_meetings -= 1
+                old_block.save()
+                instance.block = None
+                instance.save()
 
 
 class Profile(models.Model):
