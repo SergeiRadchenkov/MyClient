@@ -771,3 +771,81 @@ input[type="date"] {
 .client-number {
     font-size: 16px; /* Размер шрифта для статистики */
 }
+
+/* Стили для мобильной версии */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .navbar ul li {
+        margin: 10px 0;
+    }
+
+    .navbar ul li a {
+        font-size: 18px;
+        padding: 10px 20px;
+    }
+
+    .logo {
+        height: 80px;
+    }
+
+    .app-name {
+        font-size: 30px;
+        padding: 5px 10px;
+    }
+
+    main {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    main p {
+        font-size: 16px;
+    }
+
+    main p strong {
+        font-size: 18px;
+    }
+
+    /* Стили для кнопок */
+    .settings-buttons {
+        display: block; /* Кнопки отображаются друг под другом */
+    }
+
+    .settings-buttons .btn {
+        font-size: 12px;
+        margin: 5;
+        padding: 5;
+
+    }
+
+    .clients-top {
+        flex-direction: column; /* Элементы друг под другом */
+        gap: 8px;
+    }
+
+    .search1 input[type="text"] {
+        width: 100%; /* Занимает всю ширину */
+    }
+
+    .clients-top input[type="date"] {
+        width: 100%; /* Занимает всю ширину */
+    }
+
+    .clients-top .btn {
+        width: 100%; /* Кнопка занимает всю ширину */
+        height: 35px; /* Уменьшаем высоту */
+    }
+
+    .analytics-block {
+        padding: 5;
+    }
+}
