@@ -24,7 +24,7 @@ class ClientForm(ModelForm):
     class Meta:
         model = Client
         fields = ['first_name', 'last_name', 'metro', 'street', 'house_number',
-                  'entrance', 'floor', 'intercom', 'phone', 'price_offline', 'price_online']
+                  'entrance', 'floor', 'flat_number', 'intercom', 'phone', 'price_offline', 'price_online']
         widgets = {
             'last_name': forms.TextInput(attrs={'required': False}),
             'metro': forms.TextInput(attrs={'list': 'metro-list',
@@ -34,9 +34,9 @@ class ClientForm(ModelForm):
             'house_number': forms.TextInput(attrs={'required': False}),
             'entrance': forms.TextInput(attrs={'required': False}),
             'floor': forms.TextInput(attrs={'required': False}),
+            'flat_number': forms.TextInput(attrs={'required': False}),
             'intercom': forms.TextInput(attrs={'required': False}),
             'phone': forms.TextInput(attrs={'required': False}),
             'price_offline': forms.NumberInput(attrs={'required': False}),
             'price_online': forms.NumberInput(attrs={'required': False}),
         }
-

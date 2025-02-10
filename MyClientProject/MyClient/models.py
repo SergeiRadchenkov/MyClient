@@ -7,6 +7,7 @@ from django.dispatch import receiver
 
 
 class Client(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь", related_name="clients")
     first_name = models.CharField("Имя", max_length=100)
     last_name = models.CharField("Фамилия", max_length=100, blank=True, null=True, default='яя')
     metro = models.CharField("Метро", max_length=255, blank=True, null=True, default='яя')
@@ -14,6 +15,7 @@ class Client(models.Model):
     house_number = models.CharField("Номер дома", max_length=10, blank=True, null=True, default='яя')
     entrance = models.CharField("Подъезд", max_length=10, blank=True, null=True, default='яя')
     floor = models.CharField("Этаж", max_length=10, blank=True, null=True, default='яя')
+    flat_number = models.CharField("Номер квартиры", max_length=10, blank=True, null=True, default='яя')
     intercom = models.CharField("Домофон", max_length=50, blank=True, null=True, default='яя')
     phone = models.CharField("Телефон", max_length=20, blank=True, null=True, default='яя')
     price_offline = models.DecimalField("Цена за работу оффлайн", max_digits=10, decimal_places=2, blank=True, default=0)
@@ -33,12 +35,14 @@ class Block(models.Model):
         ('completed', 'Завершённый'),
     ]
 
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь", related_name="blocks")
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='blocks', verbose_name="Клиент")
     block_number = models.PositiveIntegerField("Номер блока")
     total_meetings = models.PositiveIntegerField("Количество встреч в блоке")
     completed_meetings = models.PositiveIntegerField("Пройденные встречи", default=0)
     cost = models.DecimalField("Стоимость блока", max_digits=10, decimal_places=2)
     status = models.CharField("Статус блока", max_length=10, choices=STATUS_CHOICES, default='active')
+    created_at = models.DateTimeField("Дата создания", auto_now_add=True)
 
     class Meta:
         unique_together = ('client', 'block_number')  # Каждый блок уникален для клиента
@@ -60,13 +64,14 @@ class Block(models.Model):
         super().save(*args, **kwargs)
 
     @staticmethod
-    def create_block(client, total_meetings, completed_meetings, cost):
+    def create_block(user, client, total_meetings, completed_meetings, cost):
         """
         Удобный метод для создания нового блока.
         """
         last_block = Block.objects.filter(client=client).order_by('block_number').last()
         block_number = last_block.block_number + 1 if last_block else 1
         return Block.objects.create(
+            user=user,
             client=client,
             block_number=block_number,
             completed_meetings=completed_meetings,
@@ -76,6 +81,7 @@ class Block(models.Model):
 
 
 class Schedule(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь", related_name="schedules")
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='schedules')
     date = models.DateField("Дата", default=now)
     time = models.TimeField("Время")
@@ -165,5 +171,3 @@ def save_user_profile(sender, instance, **kwargs):
 class ScheduleAnalytics:
     def __init__(self, schedules):
         self.schedules = schedules
-
-

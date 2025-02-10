@@ -40,6 +40,10 @@
         <input type="text" id="floor" name="floor" value="{% if client.floor != 'яя' %}{{ form.floor.value }}{% endif %}">
     </div>
     <div class="form-group">
+        <label for="flat_number">Квартира:</label>
+        <input type="text" id="flat_number" name="flat_number" value="{% if client.flat_number != 'яя' %}{{ form.flat_number.value }}{% endif %}">
+    </div>
+    <div class="form-group">
         <label for="intercom">Домофон:</label>
         <input type="text" id="intercom" name="intercom" value="{% if client.intercom != 'яя' %}{{ form.intercom.value }}{% endif %}">
     </div>

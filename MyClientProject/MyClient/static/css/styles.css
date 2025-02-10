@@ -702,22 +702,21 @@ input[type="date"] {
 }
 
 .stat-item {
-    background: #f8f9fa;
+    background: linear-gradient(to bottom, #e0f7fa, #90deea);
     padding: 1rem;
     border-radius: 8px;
     text-align: center;
 }
 
 .stat-label {
-    display: block;
     font-size: 0.9rem;
     color: #666;
 }
 
 .stat-value {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: bold;
-    color: #333;
+    color: #007bff; /* Основной цвет приложения */
 }
 
 .clients-stats {
@@ -728,8 +727,12 @@ input[type="date"] {
 .client-stat {
     display: flex;
     justify-content: space-between;
-    padding: 0.5rem;
-    border-bottom: 1px solid #eee;
+    align-items: center;
+    padding: 10px;
+    background-color: #f9f9f9;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .meetings-list {
@@ -746,8 +749,25 @@ input[type="date"] {
     border-radius: 6px;
 }
 
-.status-badges {
-    display: flex;
-    gap: 0.5rem;
+.client-name {
+    font-weight: bold;
+    font-size: 16px; /* Размер шрифта имени */
+    flex: 1; /* Занимает все доступное пространство слева */
 }
-</style>
+
+.client-numbers {
+    display: flex;
+    gap: 15px; /* Расстояние между элементами */
+}
+
+.client-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px; /* Пространство между именем и статистикой */
+    width: 100%;
+}
+
+.client-number {
+    font-size: 16px; /* Размер шрифта для статистики */
+}

@@ -18,7 +18,6 @@ urlpatterns = [
     path('reset-password/', views.reset_password, name='reset_password'),
     path('clients/add/', views.add_client, name='add_client'),
     path('clients/<int:client_id>/', views.client_detail, name='client_detail'),
-    path('clients/', views.clients, name='clients'),
     path('autocomplete/', views.autocomplete, name='autocomplete'),
     path('client/<int:client_id>/', views.client_settings, name='client_settings'),
     path('clients/<int:client_id>/edit/', views.edit_client, name='edit_client'),

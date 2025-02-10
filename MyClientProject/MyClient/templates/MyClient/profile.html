@@ -46,22 +46,32 @@
 <!-- Блоки аналитики -->
 <div class="analytics-container">
     <!-- Незавершенные встречи -->
+    {% if unfinished_meetings %}
     <div class="analytics-block">
         <p><strong>Незавершенные встречи</strong></p>
-        {% if unfinished_meetings %}
             <div class="meetings-list">
-                {% for meeting in unfinished_meetings %}
+                {% for schedule in unfinished_meetings %}
                 <div class="meeting-item">
-                    <div>{{ meeting.date }} {{ meeting.time }} - {{ meeting.client }}</div>
-                    <div class="status-badges">
-                        {% if not meeting.is_paid %}<span class="badge bg-warning">Не оплачено</span>{% endif %}
-                        {% if not meeting.is_canceled %}<span class="badge bg-danger">Активно</span>{% endif %}
+                    <div>{{ schedule.date }} {{ schedule.time }} - {{ schedule.client.first_name }}{% if schedule.client.last_name != "яя" %} {{ schedule.client.last_name }}{% endif %}</div>
+                    <div class="mt-2">
+                        <button
+                            class="btn btn-sm {% if schedule.is_completed %}btn-success{% else %}btn-outline-success{% endif %} btn-completed"
+                            data-schedule-id="{{ schedule.id }}" {% if schedule.is_canceled %}disabled{% endif %}>
+                            Выполнено
+                        </button>
+                        <button class="btn btn-sm {% if schedule.is_paid %}btn-primary{% else %}btn-outline-primary{% endif %} btn-paid"
+                                data-schedule-id="{{ schedule.id }}"
+                                {% if not schedule.is_completed %}disabled{% endif %}>
+                                Оплачено
+                        </button>
+                        <button class="btn btn-sm {% if schedule.is_canceled %}btn-danger{% else %}btn-outline-danger{% endif %} btn-canceled"
+                                data-schedule-id="{{ schedule.id }}">
+                                Отменено
+                        </button>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-        {% else %}
-            <p>Нет незавершенных встреч</p>
         {% endif %}
     </div>
 
@@ -75,16 +85,16 @@
                 <span class="stat-value">{{ period.completed }}</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">Сумма оплат:</span>
+                <span class="stat-label">Отмены:</span>
+                <span class="stat-value">{{ period.cancelled }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Оплачено:</span>
                 <span class="stat-value">{{ period.total_paid|default:0  }}</span>
             </div>
             <div class="stat-item">
                 <span class="stat-label">Оплачено блоков:</span>
                 <span class="stat-value">{{ period.blocks_paid|default:0  }}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Отмены:</span>
-                <span class="stat-value">{{ period.cancelled }}</span>
             </div>
         </div>
 
@@ -92,13 +102,25 @@
             {% for client in period.clients_stats %}
             <div class="client-stat">
                 <div class="client-name">{{ client.name }}</div>
-                <div class="client-numbers">
-                    <span>Встреч: {{ client.completed }}</span>
-                    <span>Отмен: {{ client.cancelled }}</span>
+                <div class="client-numbers grid-layout">
+                    <div class="client-stat-item">
+                        <span class="stat-label">Встречи:</span>
+                        <strong>{{ client.completed }}</strong>
+                    </div>
+                    <div class="client-stat-item">
+                        <span class="stat-label">Отмены:</span>
+                        <strong>{{ client.cancelled }}</strong>
+                    </div>
+                    <div class="client-stat-item">
+                        <span class="stat-label">Оплаты:</span>
+                        <strong>{{ client.total_paid|default:0 }}</strong>
+                    </div>
+                    <div class="client-stat-item">
+                        <span class="stat-label">Оплаты блоков:</span>
+                        <strong>{{ client.blocks_paid|default:0 }}</strong>
+                    </div>
                 </div>
             </div>
-            {% empty %}
-            <p>Нет данных о клиентах</p>
             {% endfor %}
         </div>
     </div>
@@ -109,25 +131,158 @@
         <p><strong>Вся статистика</strong></p>
         <div class="stats-grid">
             <div class="stat-item">
-                <span class="stat-label">Всего завершено:</span>
+                <span class="stat-label">Всего завершено:</span><br>
                 <span class="stat-value">{{ lifetime_stats.completed }}</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">Общая сумма оплат:</span>
+                <span class="stat-label">Всего отмен:</span><br>
+                <span class="stat-value">{{ lifetime_stats.cancelled }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Оплачено:</span><br>
                 <span class="stat-value">{{ lifetime_stats.total_paid|default:0 }}</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">Всего блоков:</span>
+                <span class="stat-label">Оплачено блоков:</span><br>
                 <span class="stat-value">{{ lifetime_stats.blocks_paid|default:0 }}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Всего отмен:</span>
-                <span class="stat-value">{{ lifetime_stats.cancelled }}</span>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+<script>
+    // Функция для обработки нажатия кнопки "Выполнено"
+    document.addEventListener("DOMContentLoaded", function () {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // Добавляем обработчики событий для всех кнопок "Выполнено"
+        document.querySelectorAll(".btn-completed").forEach(button => {
+            button.addEventListener("click", function () {
+                const scheduleId = this.dataset.scheduleId; // ID записи из атрибута data-schedule-id
+
+                fetch(`/schedule/complete/${scheduleId}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        // Меняем состояние кнопки в зависимости от is_completed
+                        if (data.is_completed) {
+                            this.classList.remove("btn-outline-success");
+                            this.classList.add("btn-success");
+                        } else {
+                            this.classList.remove("btn-success");
+                            this.classList.add("btn-outline-success");
+                        }
+
+                        // Находим кнопку "Оплачено" для той же записи
+                        const paidButton = document.querySelector(`.btn-paid[data-schedule-id="${scheduleId}"]`);
+                        if (paidButton) {
+                            if (data.is_paid) {
+                                paidButton.classList.remove("btn-outline-primary");
+                                paidButton.classList.add("btn-primary");
+                                paidButton.disabled = false;
+                            } else {
+                                paidButton.classList.remove("btn-primary");
+                                paidButton.classList.add("btn-outline-primary");
+                                paidButton.disabled = true;
+                            }
+                        }
+                        location.reload();
+                    } else {
+                        console.error("Ошибка:", data.message);
+                    }
+                })
+                .catch(error => console.error("Ошибка:", error));
+            });
+        });
+    });
+</script>
+<script>
+    // Функция для обработки нажатия кнопки "Оплачено"
+    document.addEventListener("DOMContentLoaded", function () {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // Добавляем обработчики событий для всех кнопок "Оплачено"
+        document.querySelectorAll(".btn-paid").forEach(button => {
+            button.addEventListener("click", function () {
+                const scheduleId = this.dataset.scheduleId; // ID записи из атрибута data-schedule-id
+
+                fetch(`/schedule/pay/${scheduleId}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        // Меняем состояние кнопки в зависимости от is_paid
+                        if (data.is_paid) {
+                            this.classList.remove("btn-outline-primary");
+                            this.classList.add("btn-primary");
+                            location.reload();
+                        } else {
+                            this.classList.remove("btn-primary");
+                            this.classList.add("btn-outline-primary");
+                            location.reload();
+                        }
+                    } else {
+                        console.error("Ошибка:", data.message);
+                    }
+                })
+                .catch(error => console.error("Ошибка:", error));
+            });
+        });
+    });
+</script>
+<script>
+    // Функция для обработки нажатия кнопки "Отменено"
+    document.addEventListener("DOMContentLoaded", function () {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // Добавляем обработчики событий для всех кнопок "Оплачено"
+        document.querySelectorAll(".btn-canceled").forEach(button => {
+            button.addEventListener("click", function () {
+                const scheduleId = this.dataset.scheduleId; // ID записи из атрибута data-schedule-id
+
+                fetch(`/schedule/cancel/${scheduleId}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        // Меняем состояние кнопки в зависимости от is_cancel
+                        if (data.is_cancel) {
+                            this.classList.remove("btn-outline-danger");
+                            this.classList.add("btn-danger");
+                            location.reload();
+                        } else {
+                            this.classList.remove("btn-danger");
+                            this.classList.add("btn-outline-danger");
+                            location.reload();
+                        }
+                    } else {
+                        console.error("Ошибка:", data.message);
+                    }
+                })
+                .catch(error => console.error("Ошибка:", error));
+            });
+        });
+    });
+</script>
 {% endblock %}
 
 

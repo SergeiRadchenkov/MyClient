@@ -47,7 +47,7 @@
             {% for client in page_obj.object_list %}
             <div class="client-card mb-3 p-3" style="background-color: {% cycle '#f9f9f9' '#e9ecef' %}; cursor: pointer;" onclick="location.href='{% url 'client_detail' client.id %}'">
                 <div><strong>{{ client.first_name }}{% if client.last_name != "яя" %} {{ client.last_name }}{% endif %}</strong>{% if client.metro != "яя" %}, метро {{ client.metro }}{% endif %}</div>
-                <div>{% if client.street != "яя" %}улица {{ client.street }}, {% endif %}{% if client.house_number != "яя" %}дом {{ client.house_number }}, {% endif %}{% if client.entrance != "яя" %}подъезд {{ client.entrance }}, {% endif %}{% if client.floor != "яя" %}этаж {{ client.floor }}, {% endif %}{% if client.intercom != "яя" %}домофон {{ client.intercom }}{% endif %}</div>
+                <div>{% if client.street != "яя" %}улица {{ client.street }}, {% endif %}{% if client.house_number != "яя" %}дом {{ client.house_number }}, {% endif %}{% if client.entrance != "яя" %}подъезд {{ client.entrance }}, {% endif %}{% if client.floor != "яя" %}этаж {{ client.floor }}, {% endif %}{% if client.flat_number != "яя" %}квартира {{ client.flat_number }}, {% endif %}{% if client.intercom != "яя" %}домофон {{ client.intercom }}{% endif %}</div>
             </div>
             {% empty %}
             <p>Клиенты не найдены.</p>
@@ -56,7 +56,7 @@
             {% for client in clients %}
             <div class="client-card mb-3 p-3" style="background-color: {% cycle '#f9f9f9' '#e9ecef' %}; cursor: pointer;" onclick="location.href='{% url 'client_detail' client.id %}'">
                 <div><strong>{{ client.first_name }}{% if client.last_name != "яя" %} {{ client.last_name }}{% endif %}</strong>{% if client.metro != "яя" %}, метро {{ client.metro }}{% endif %}</div>
-                <div>{% if client.street != "яя" %}улица {{ client.street }}, {% endif %}{% if client.house_number != "яя" %}дом {{ client.house_number }}, {% endif %}{% if client.entrance != "яя" %}подъезд {{ client.entrance }}, {% endif %}{% if client.floor != "яя" %}этаж {{ client.floor }}, {% endif %}{% if client.intercom != "яя" %}домофон {{ client.intercom }}{% endif %}</div>
+                <div>{% if client.street != "яя" %}улица {{ client.street }}, {% endif %}{% if client.house_number != "яя" %}дом {{ client.house_number }}, {% endif %}{% if client.entrance != "яя" %}подъезд {{ client.entrance }}, {% endif %}{% if client.floor != "яя" %}этаж {{ client.floor }}, {% endif %}{% if client.flat_number != "яя" %}квартира {{ client.flat_number }}, {% endif %}{% if client.intercom != "яя" %}домофон {{ client.intercom }}{% endif %}</div>
             </div>
             {% empty %}
             <p>Клиенты не найдены.</p>
@@ -64,25 +64,26 @@
         {% endif %}
     </div>
     <div class="pagination">
-    <ul class="pagination">
-        {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&sort={{ sort_by }}">Назад</a>
-            </li>
+        {% if page_obj.object_list %}
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&sort={{ sort_by }}">Назад</a>
+                    </li>
+                {% endif %}
+                {% for page in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page == page_obj.number %}active{% endif %}">
+                        <a class="page-link" href="?page={{ page }}&search={{ search_query }}&sort={{ sort_by }}">{{ page }}</a>
+                    </li>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&sort={{ sort_by }}">Вперёд</a>
+                    </li>
+                {% endif %}
+            </ul>
         {% endif %}
-        {% for page in page_obj.paginator.page_range %}
-            <li class="page-item {% if page == page_obj.number %}active{% endif %}">
-                <a class="page-link" href="?page={{ page }}&search={{ search_query }}&sort={{ sort_by }}">{{ page }}</a>
-            </li>
-        {% endfor %}
-        {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&sort={{ sort_by }}">Вперёд</a>
-            </li>
-        {% endif %}
-    </ul>
-</div>
-
+    </div>
 </div>
 <script>
     document.querySelector('select[name="sort"]').addEventListener('change', function () {

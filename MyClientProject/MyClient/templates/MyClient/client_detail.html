@@ -30,7 +30,7 @@
 <div class="profile-client">
     <h1>{{ client.first_name }}{% if client.last_name != "яя" %} {{ client.last_name }}{% endif %}</h1>
     <p><strong>Метро:</strong>{% if client.metro != "яя" %} {{ client.metro }}{% endif %}</p>
-    <p><strong>Адрес:</strong>{% if client.street != "яя" %} улица {{ client.street }},{% endif %}{% if client.house_number != "яя" %} дом {{ client.house_number }},{% endif %}{% if client.entrance != "яя" %} подъезд {{ client.entrance }},{% endif %}{% if client.floor != "яя" %} этаж {{ client.floor }},{% endif %}{% if client.intercom != "яя" %} домофон {{ client.intercom }}{% endif %}</p>
+    <p><strong>Адрес:</strong>{% if client.street != "яя" %} улица {{ client.street }},{% endif %}{% if client.house_number != "яя" %} дом {{ client.house_number }},{% endif %}{% if client.entrance != "яя" %} подъезд {{ client.entrance }},{% endif %}{% if client.floor != "яя" %} этаж {{ client.floor }},{% endif %}{% if client.flat_number != "яя" %} квартира {{ client.flat_number }},{% endif %}{% if client.intercom != "яя" %} домофон {{ client.intercom }}{% endif %}</p>
     <p><strong>Телефон:</strong>{% if client.phone != "яя" %} {{ client.phone }}{% endif %}</p>
     <p><strong>Цена оффлайн:</strong>{% if client.price_offline != 0 %} {{ client.price_offline }}{% endif %}</p>
     <p><strong>Цена онлайн:</strong>{% if client.price_online != 0 %} {{ client.price_online }}{% endif %}</p>
