@@ -603,6 +603,12 @@ input[type="number"] {
 .client-settings {
     display: flex;
     gap: 20px;
+    word-wrap: break-word; /* Перенос слов, если они слишком длинные */
+}
+
+.client-settings p {
+    margin: 5px 0; /* Уменьшаем отступы между параграфами */
+    font-size: 16px; /* Подгоняем размер шрифта */
 }
 
 .client-settings .settings-buttons {
@@ -847,5 +853,39 @@ input[type="date"] {
 
     .analytics-block {
         padding: 5;
+    }
+
+    .client-settings {
+        flex-direction: column; /* Меняем на вертикальное расположение */
+        gap: 1px; /* Уменьшаем разрыв для небольших экранов */
+    }
+
+    .client-settings {
+        padding: 10px; /* Уменьшаем отступы для маленьких экранов */
+        font-size: 14px; /* Уменьшаем размер текста */
+    }
+
+    .client-settings p {
+        font-size: 14px; /* Также уменьшаем размер шрифта */
+        line-height: 1.4; /* Добавляем комфортный межстрочный интервал */
+    }
+
+    .client-settings p strong {
+        font-size: 14px; /* Также уменьшаем размер шрифта */
+        line-height: 1.4; /* Добавляем комфортный межстрочный интервал */
+    }
+
+    .client-stat {
+        display: inline-block;
+    }
+
+    .profile-info p strong {
+        font-size: 14px; /* Также уменьшаем размер шрифта */
+        line-height: 1.4; /* Добавляем комфортный межстрочный интервал */
+    }
+
+    .profile-info p {
+        font-size: 14px; /* Также уменьшаем размер шрифта */
+        line-height: 1.4; /* Добавляем комфортный межстрочный интервал */
     }
 }

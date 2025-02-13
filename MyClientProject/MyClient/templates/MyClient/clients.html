@@ -71,11 +71,13 @@
                         <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&sort={{ sort_by }}">Назад</a>
                     </li>
                 {% endif %}
+                {% if page_obj.paginator.page_range|length > 1 %}
                 {% for page in page_obj.paginator.page_range %}
                     <li class="page-item {% if page == page_obj.number %}active{% endif %}">
                         <a class="page-link" href="?page={{ page }}&search={{ search_query }}&sort={{ sort_by }}">{{ page }}</a>
                     </li>
                 {% endfor %}
+                {% endif %}
                 {% if page_obj.has_next %}
                     <li class="page-item">
                         <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&sort={{ sort_by }}">Вперёд</a>

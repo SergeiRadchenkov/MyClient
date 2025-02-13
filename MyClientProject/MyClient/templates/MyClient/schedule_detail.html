@@ -194,6 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('editScheduleForm').addEventListener('submit', function(event) {
         event.preventDefault(); // Предотвращение стандартной отправки формы
         const formData = new FormData(this);
+        const isOnline = document.getElementById("is_online").checked;
         let clientID = document.getElementById("clientId")?.value;
         const scheduleCost = document.getElementById("schedule_cost").value;
 
@@ -222,6 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
             formData.append("schedule_cost", scheduleCost);
             formData.append("client_id", clientID);
+            formData.append("is_online", isOnline);
             fetch(this.action, {
                 method: 'POST',
                 body: formData,

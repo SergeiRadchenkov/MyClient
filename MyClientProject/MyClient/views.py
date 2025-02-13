@@ -261,7 +261,7 @@ def clients(request):
                     })
             if len(results) > 20:
                 paginator = Paginator(results, 20)  # 20 клиентов на страницу
-                results = paginator.get_page(page_number)  # Получаем текущую страницу
+                page_obj = paginator.get_page(page_number)  # Получаем текущую страницу
         else:  # Если одно слово или больше двух
             for client in clients:
                 if any(term in client.first_name.lower() for term in search_terms) or \
@@ -282,9 +282,9 @@ def clients(request):
                     })
             if len(results) > 20:
                 paginator = Paginator(results, 20)  # 20 клиентов на страницу
-                results = paginator.get_page(page_number)  # Получаем текущую страницу
+                page_obj = paginator.get_page(page_number)  # Получаем текущую страницу
 
-        return render(request, 'MyClient/clients.html', {'page_obj': results, 'clients': results, 'search_query': search_query, 'sort_by': sort_by})
+        return render(request, 'MyClient/clients.html', {'page_obj': page_obj, 'clients': results, 'search_query': search_query, 'sort_by': sort_by})
 
 
     def get_key_func(field):
@@ -318,7 +318,7 @@ def clients(request):
 def autocomplete(request):
     query = request.GET.get('query', '').lower()
     query_schedule = request.GET.get('search_schedules', '').lower()
-    results = Client.objects.all()  # Получаем всех клиентов
+    results = Client.objects.filter(user=request.user)  # Получаем всех клиентов
     clients = []
 
     if query:
@@ -335,7 +335,7 @@ def autocomplete(request):
             # Добавляем клиента в список
             clients.append({
                 'id': result.id,
-                'name': f'{result.first_name}{' ' + result.last_name if result.last_name != 'яя' else ''}{', метро ' + result.metro if result.metro != 'яя' else ''}{', улица ' + result.street if result.street != 'яя' else ''}'
+                'name': f"{result.first_name}{' ' + result.last_name if result.last_name != 'яя' else ''}{', метро ' + result.metro if result.metro != 'яя' else ''}{', улица ' + result.street if result.street != 'яя' else ''}"
             })
 
     # Возвращаем результат в формате JSON
@@ -366,24 +366,24 @@ def profile(request):
 
     # Незавершенные встречи
     unfinished_meetings = Schedule.objects.filter(
-        date__lt=today
+        date__lt=today, user=request.user
     ).exclude(
         Q(is_paid=True) | Q(is_canceled=True)
     ).select_related('client')
 
     # Периоды для анализа
     periods = [
-        get_week_stats(),
-        get_month_stats(),
-        get_previous_month_stats()
+        get_week_stats(user),
+        get_month_stats(user),
+        get_previous_month_stats(user)
     ]
 
     # Общая статистика
     lifetime_stats = {
-        'completed': Schedule.objects.filter(is_completed=True).count(),
-        'total_paid': Schedule.objects.filter(is_paid=True).aggregate(Sum('cost'))['cost__sum'] or 0,
-        'blocks_paid': Block.objects.all().aggregate(Sum('cost'))['cost__sum'] or 0,
-        'cancelled': Schedule.objects.filter(is_canceled=True).count(),
+        'completed': Schedule.objects.filter(is_completed=True, user=request.user).count(),
+        'total_paid': Schedule.objects.filter(is_paid=True, user=request.user).aggregate(Sum('cost'))['cost__sum'] or 0,
+        'blocks_paid': Block.objects.filter(user=request.user).aggregate(Sum('cost'))['cost__sum'] or 0,
+        'cancelled': Schedule.objects.filter(is_canceled=True, user=request.user).count(),
     }
 
     context = {
@@ -400,7 +400,7 @@ def profile(request):
     return render(request, 'MyClient/profile.html', context)
 
 
-def get_month_stats():
+def get_month_stats(user):
     today = localtime()
     first_day_of_month = today.replace(day=1)
 
@@ -409,14 +409,16 @@ def get_month_stats():
 
     blocks_stats = Block.objects.filter(
         created_at__gte=first_day_of_month,
-        created_at__lte=today
+        created_at__lte=today,
+        user=user
     ).aggregate(
         blocks_total=Sum('cost')
     )
 
     blocks_stats_clients = Block.objects.filter(
         created_at__gte=first_day_of_month,
-        created_at__lte=today
+        created_at__lte=today,
+        user=user
     ).values(
         'client__id'
     ).annotate(
@@ -427,14 +429,14 @@ def get_month_stats():
     blocks_stats_dict = {b['client__id']: b['blocks_total'] for b in blocks_stats_clients}
 
     # Основная статистика
-    stats = Schedule.objects.filter(month_filter).aggregate(
+    stats = Schedule.objects.filter(month_filter, user=user).aggregate(
         completed=Count('id', filter=Q(is_completed=True)),
         total_paid=Sum('cost', filter=Q(is_paid=True)),
         cancelled=Count('id', filter=Q(is_canceled=True))
     )
 
     # Статистика по клиентам
-    clients_stats = Schedule.objects.filter(month_filter).values(
+    clients_stats = Schedule.objects.filter(month_filter, user=user).values(
         'client__id', 'client__first_name', 'client__last_name'
     ).annotate(
         completed=Count('id', filter=Q(is_completed=True)),
@@ -458,7 +460,7 @@ def get_month_stats():
     }
 
 
-def get_previous_month_stats():
+def get_previous_month_stats(user):
     today = localtime()
     first_day_prev_month = (today - relativedelta(months=1)).replace(day=1)
     last_day_prev_month = first_day_prev_month + relativedelta(day=31)
@@ -468,14 +470,16 @@ def get_previous_month_stats():
 
     blocks_stats = Block.objects.filter(
         created_at__gte=first_day_prev_month,
-        created_at__lte=last_day_prev_month
+        created_at__lte=last_day_prev_month,
+        user=user
     ).aggregate(
         blocks_total=Sum('cost')
     )
 
     blocks_stats_clients = Block.objects.filter(
         created_at__gte=first_day_prev_month,
-        created_at__lte=last_day_prev_month
+        created_at__lte=last_day_prev_month,
+        user=user
     ).values(
         'client__id'
     ).annotate(
@@ -486,14 +490,14 @@ def get_previous_month_stats():
     blocks_stats_dict = {b['client__id']: b['blocks_total'] for b in blocks_stats_clients}
 
     # Основная статистика
-    stats = Schedule.objects.filter(prev_month_filter).aggregate(
+    stats = Schedule.objects.filter(prev_month_filter, user=user).aggregate(
         completed=Count('id', filter=Q(is_completed=True)),
         total_paid=Sum('cost', filter=Q(is_paid=True)),
         cancelled=Count('id', filter=Q(is_canceled=True))
     )
 
     # Статистика по клиентам
-    clients_stats = Schedule.objects.filter(prev_month_filter).values(
+    clients_stats = Schedule.objects.filter(prev_month_filter, user=user).values(
         'client__id', 'client__first_name', 'client__last_name'
     ).annotate(
         completed=Count('id', filter=Q(is_completed=True)),
@@ -517,20 +521,22 @@ def get_previous_month_stats():
     }
 
 
-def get_week_stats():
+def get_week_stats(user):
     today = localtime()
     week_ago = today - timedelta(days=7)
 
     blocks_stats = Block.objects.filter(
         created_at__gte=week_ago,
-        created_at__lt=today
+        created_at__lt=today,
+        user=user
     ).aggregate(
         blocks_total=Sum('cost')
     )
 
     blocks_stats_clients = Block.objects.filter(
         created_at__gte=week_ago,
-        created_at__lt=today
+        created_at__lt=today,
+        user=user
     ).values(
         'client__id'
     ).annotate(
@@ -541,7 +547,7 @@ def get_week_stats():
     blocks_stats_dict = {b['client__id']: b['blocks_total'] for b in blocks_stats_clients}
 
     stats = Schedule.objects.filter(
-        date__range=[week_ago, today - timedelta(days=1)]
+        date__range=[week_ago, today], user=user
     ).aggregate(
         completed=Count('id', filter=Q(is_completed=True)),
         total_paid=Sum('cost', filter=Q(is_paid=True)),
@@ -549,7 +555,7 @@ def get_week_stats():
     )
 
     clients_stats = Schedule.objects.filter(
-        date__range=[week_ago, today - timedelta(days=1)]
+        date__range=[week_ago, today], user=user
     ).values(
         'client__id', 'client__first_name', 'client__last_name'
     ).annotate(
@@ -581,7 +587,7 @@ def blocks(request):
     client_id = request.GET.get('client_id')
 
     # Фильтрация блоков
-    blocks = Block.objects.all()
+    blocks = Block.objects.filter(user=request.user)
     if client_id:
         client = Client.objects.get(id=client_id)
         blocks = blocks.filter(client=client)
