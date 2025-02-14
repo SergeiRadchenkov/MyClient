@@ -282,6 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
         event.preventDefault();
         const formData = new FormData(this);
         const isOnline = document.getElementById("is_online").checked;
+        const useBlock = document.getElementById("is_block_payment").checked;
         const scheduleCost = document.getElementById("schedule_cost").value;
 
         // Удаляем предыдущее сообщение об ошибке, если оно есть
@@ -291,6 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         formData.append("is_online", isOnline);
+        formData.append("is_block_payment", useBlock);
         formData.append("schedule_cost", scheduleCost);
 
         fetch("{% url 'add_schedule' %}", {
@@ -542,6 +544,26 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+</script>
+<script>
+    document.getElementById('is_block_payment').addEventListener('change', function() {
+    const costInput = document.getElementById('schedule_cost');
+    if (this.checked) {
+        costInput.value = 0;
+        costInput.readOnly = true;
+    } else {
+        costInput.readOnly = false;
+        const clientId = document.getElementById('clientId')?.value;
+        if (clientId) {
+            fetch(`/get_client_cost/${clientId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    const isOnline = document.getElementById('is_online').checked;
+                    costInput.value = isOnline ? data.price_online : data.price_offline;
+                });
+        }
+    }
+});
 </script>
 
 {% endblock %}

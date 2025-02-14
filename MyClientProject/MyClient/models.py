@@ -90,8 +90,8 @@ class Schedule(models.Model):
     is_paid = models.BooleanField("Оплачено", default=False)
     is_canceled = models.BooleanField("Отменено", default=False)
     cost = models.DecimalField("Стоимость", max_digits=10, decimal_places=2)
-    block = models.ForeignKey(Block, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Привязанный блок"
-    )
+    block = models.ForeignKey(Block, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Привязанный блок")
+    use_block = models.BooleanField("Оплатить блоком", default=False)
 
     def get_plan(self):
         return float(self.cost)
@@ -119,6 +119,10 @@ def track_paid_changes(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Schedule)
 def handle_paid_status(sender, instance, **kwargs):
+    # Проверяем, используется ли блок
+    if not instance.use_block:
+        return
+
     old_is_paid = getattr(instance, '_old_is_paid', False)
     new_is_paid = instance.is_paid
     old_block = getattr(instance, '_old_block', None)

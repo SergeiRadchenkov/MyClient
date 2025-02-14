@@ -176,6 +176,7 @@ def add_schedule(request):
             hour = request.POST.get('schedule_hour')
             minute = request.POST.get('schedule_minute')
             is_online = request.POST.get('is_online') == 'true'  # Преобразование строки в булево значение
+            use_block = request.POST.get('is_block_payment') == 'true'  # Получение значения галочки
             cost = request.POST.get('schedule_cost')
 
             # Проверка наличия клиента
@@ -193,7 +194,8 @@ def add_schedule(request):
                 date=date,
                 time=time,
                 is_online=is_online,
-                cost=cost
+                cost=cost,
+                use_block=use_block
             )
 
             return JsonResponse({'success': True})
@@ -210,6 +212,7 @@ def edit_schedule(request, schedule_id):
         schedule.client_id = request.POST.get('client_id')
         schedule.cost = request.POST.get('schedule_cost')
         schedule.is_online = request.POST.get('is_online') == 'true'
+        schedule.use_block = request.POST.get('is_block_payment') == 'true'
         schedule.date = request.POST.get('schedule_date')
         schedule.time = f"{request.POST.get('schedule_hour')}:{request.POST.get('schedule_minute')}"
         schedule.save()

@@ -879,6 +879,14 @@ input[type="date"] {
         display: inline-block;
     }
 
+    .client-stat-item {
+        font-size: 14px; /* Также уменьшаем размер шрифта */
+    }
+
+    .stat-label {
+        font-size: 12px; /* Также уменьшаем размер шрифта */
+    }
+
     .profile-info p strong {
         font-size: 14px; /* Также уменьшаем размер шрифта */
         line-height: 1.4; /* Добавляем комфортный межстрочный интервал */
@@ -887,5 +895,10 @@ input[type="date"] {
     .profile-info p {
         font-size: 14px; /* Также уменьшаем размер шрифта */
         line-height: 1.4; /* Добавляем комфортный межстрочный интервал */
+    }
+
+    .meeting-item {
+        font-size: 14px; /* Также уменьшаем размер шрифта */
+        display: inline-block;
     }
 }
