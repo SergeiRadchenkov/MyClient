@@ -1,25 +1,25 @@
 /* style.css Общие настройки */
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
+    font-family: Arial, sans-serif; /* Устанавливаем шрифт */
+    margin: 0; /* Убираем внешние отступы */
+    padding: 0; /* Убираем внутренние отступы */
     background: linear-gradient(to bottom, #e0f7fa, #80deea); /* Голубой градиент */
-    color: #333;
+    color: #333; /* Устанавливаем темно-серый цвет текста */
 }
 
 /* Верхняя полоса с эмблемой */
 .header {
     background: linear-gradient(to right, #0288d1, #03a9f4); /* Синий градиент */
-    padding: 15px 20px;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
+    padding: 15px 20px; /* Внутренние отступы сверху/снизу и слева/справа */
+    text-align: center; /* Выравниваем текст по центру */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Добавляем легкую тень */
+    display: flex; /* Используем Flexbox для выравнивания содержимого */
     justify-content: space-evenly; /* Равномерное распределение */
-    align-items: center;
+    align-items: center; /* Выравниваем элементы по вертикали */
 }
 
 .logo {
-    height: 120px;
+    height: 120px; /* Устанавливаем фиксированную высоту логотипа */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); /* Тень для логотипа */
     border-radius: 5px; /* Закругление углов */
 }
@@ -27,44 +27,44 @@ body {
 /* Название приложения */
 .app-name {
     font-size: 50px; /* Размер шрифта */
-    font-weight: bold;
-    color: #ffffff;
-    padding: 5px 15px;
+    font-weight: bold; /* Устанавливаем жирное начертание */
+    color: #ffffff; /* Цвет текста - белый */
+    padding: 5px 15px; /* Внутренние отступы вокруг текста */
     border: 2px solid #ffffff; /* Рамка */
-    border-radius: 10px;
-    background-color: #0288d1;
+    border-radius: 10px;  /* Закругляем углы рамки */
+    background-color: #0288d1;  /* Устанавливаем синий фон */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); /* Тень для названия */
 }
 
 /* Полоса с навигацией */
 .navbar {
-    display: flex;
-    justify-content: center;
-    background: #03a9f4;
-    padding: 10px 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;  /* Используем Flexbox для навигации */
+    justify-content: center;  /* Центрируем элементы внутри */
+    background: #03a9f4;  /* Устанавливаем голубой фон */
+    padding: 10px 20px;  /* Внутренние отступы сверху/снизу и слева/справа */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Добавляем легкую тень */
 }
 
 .navbar ul {
-    list-style: none;
-    display: flex;
-    justify-content: center;
-    margin: 0;
-    padding: 0;
+    list-style: none;  /* Убираем маркеры списка */
+    display: flex;  /* Отображаем элементы списка в одну строку */
+    justify-content: center;  /* Центрируем элементы списка */
+    margin: 0;  /* Убираем внешние отступы */
+    padding: 0;  /* Убираем внутренние отступы */
 }
 
 .navbar ul li {
-    margin: 0 15px;
+    margin: 0 15px;  /* Добавляем горизонтальный отступ между элементами */
 }
 
 .navbar ul li a {
-    text-decoration: none;
-    color: white;
-    font-weight: bold;
+    text-decoration: none;  /* Убираем подчеркивание текста */
+    color: white;  /* Цвет текста - белый */
+    font-weight: bold;  /* Устанавливаем жирное начертание */
     font-size: 19px; /* Увеличение размера текста */
-    padding: 5px 10px;
-    border-radius: 5px;
-    transition: background 0.3s, box-shadow 0.3s;
+    padding: 5px 10px;  /* Внутренние отступы вокруг текста */
+    border-radius: 5px;  /* Закругляем углы фона ссылки */
+    transition: background 0.3s, box-shadow 0.3s;  /* Добавляем анимацию при наведении */
 }
 
 .navbar ul li a:hover {
@@ -76,48 +76,48 @@ body {
 .navbar ul li a.active {
     background: #ffffff; /* Белый фон для активной ссылки */
     color: #0288d1; /* Цвет текста активной ссылки */
-    font-weight: bold;
+    font-weight: bold;  /* Жирное начертание текста */
     border: 2px solid #0288d1; /* Рамка активной ссылки */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Тень для активной ссылки */
 }
 
 /* Основной контент */
 main {
-    padding: 30px;
+    padding: 30px;  /* Внутренние отступы вокруг контента */
     background: #ffffff; /* Белый фон */
-    margin: 20px auto;
+    margin: 20px auto;  /* Центрируем контент и добавляем внешние отступы сверху/снизу */
     max-width: 1000px; /* Уменьшаем ширину */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень */
     border-radius: 10px; /* Закругленные углы */
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    display: flex;  /* Используем Flexbox для выравнивания содержимого */
+    flex-direction: column;  /* Размещаем элементы по вертикали */
+    gap: 20px;  /* Добавляем промежутки между элементами */
 }
 
 /* Стили для текстовых блоков в профиле */
 main p {
-    font-size: 18px;
-    line-height: 1.6;
-    color: #333;
-    font-weight: 400;
+    font-size: 18px;  /* Размер шрифта текста */
+    line-height: 1.6;  /* Межстрочный интервал */
+    color: #333;  /* Цвет текста */
+    font-weight: 400;  /* Толщина шрифта */
     margin-bottom: 15px; /* Отступы между блоками */
 }
 
 /* Стили для заголовков в контенте */
 main p strong {
-    font-size: 20px;
+    font-size: 20px;  /* Увеличенный размер текста заголовков */
     color: #0288d1; /* Цвет заголовков */
-    font-weight: 700;
+    font-weight: 700;  /* Жирный шрифт для акцента */
 }
 
 /* Стили для блока с информацией */
 .profile-info {
-    padding: 20px;
+    padding: 20px;  /* Внутренние отступы блока */
     background: #80deea; /* Голубой фон */
-    border-radius: 10px;
+    border-radius: 10px;  /* Закругленные углы */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Легкая тень */
     transition: transform 0.3s ease, box-shadow 0.3s ease; /* Плавный переход */
-    position: relative;
+    position: relative;  /* Для управления позицией элемента */
 }
 
 /* Эффект при наведении на блок с информацией */
@@ -128,149 +128,159 @@ main p strong {
 
 /* Стили для контейнера с профилем */
 .profile-header {
-    font-size: 26px;
-    font-weight: bold;
-    color: #0288d1;
-    text-align: center;
-    margin-bottom: 20px;
+    font-size: 26px;  /* Размер заголовка */
+    font-weight: bold;  /* Жирный текст для акцента */
+    color: #0288d1;  /* Синий цвет текста */
+    text-align: center;  /* Выравнивание по центру */
+    margin-bottom: 20px;  /* Отступ снизу */
     text-transform: uppercase; /* Заглавные буквы */
 }
 
 /* Нижний колонтитул */
 .footer {
-    text-align: center;
-    padding: 10px;
-    background: #0288d1;
-    color: white;
-    bottom: 0;
-    width: 100%;
+    text-align: center;  /* Центрирование текста */
+    padding: 10px;  /* Внутренние отступы */
+    background: #0288d1;  /* Синий фон */
+    color: white;  /* Белый цвет текста */
+    bottom: 0;  /* Фиксация внизу страницы */
+    width: 100%;  /* Растягивание на всю ширину */
 }
 
+/* Фиксированный нижний колонтитул */
 .footer-auth {
-    position: fixed;
-    text-align: center;
-    padding: 10px;
-    background: #0288d1;
-    color: white;
-    bottom: 0;
-    width: 100%;
+    position: fixed;  /* Фиксированная позиция */
+    text-align: center;  /* Центрирование текста */
+    padding: 10px;  /* Внутренние отступы */
+    background: #0288d1;  /* Синий фон */
+    color: white;  /* Белый цвет текста */
+    bottom: 0;  /* Расположение внизу */
+    width: 100%;  /* Растягивание на всю ширину */
 }
 
+/* Стили для контейнера авторизации */
 .auth-container {
-    text-align: center;
-    margin-top: 50px;
-    margin-bottom: 50px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    text-align: center; /* Центрирование текста */
+    margin-top: 50px;  /* Отступ сверху */
+    margin-bottom: 50px;  /* Отступ снизу */
+    display: flex;  /* Гибкий контейнер */
+    flex-direction: column;  /* Расположение элементов в колонку */
+    align-items: center;  /* Выравнивание по центру */
 }
 
+/* Заголовок авторизации */
 .auth-title {
-    font-size: 28px;
-    margin-top: 30px;
-    color: #0288d1;
-    text-transform: uppercase;
-    font-weight: bold;
-    margin-bottom: 20px;
+    font-size: 28px;  /* Размер текста */
+    margin-top: 30px;  /* Отступ сверху */
+    color: #0288d1;  /* Синий цвет текста */
+    text-transform: uppercase;  /* Заглавные буквы */
+    font-weight: bold;  /* Жирный текст */
+    margin-bottom: 20px;  /* Отступ снизу */
 }
 
+/* Кнопки авторизации */
 .auth-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    text-decoration: none;
-    padding: 15px 25px;
-    font-size: 18px;
-    color: white;
-    border-radius: 5px;
-    background: #0288d1;
-    transition: transform 0.3s, background-color 0.3s;
+    display: flex;  /* Гибкий контейнер */
+    justify-content: center;  /* Центрирование кнопок */
+    gap: 20px;  /* Расстояние между кнопками */
+    text-decoration: none;  /* Удаление подчеркивания */
+    padding: 15px 25px;  /* Внутренние отступы */
+    font-size: 18px;  /* Размер текста */
+    color: white;  /* Белый цвет текста */
+    border-radius: 5px;  /* Закругленные углы */
+    background: #0288d1;  /* Синий фон */
+    transition: transform 0.3s, background-color 0.3s;  /* Плавные эффекты */
 }
 
+/* Анимация кнопок при наведении */
 .auth-btn-animate:hover {
-    transform: scale(1.2);
-    background-color: #03a9f4;
+    transform: scale(1.2);  /* Увеличение размера */
+    background-color: #03a9f4;  /* Светло-синий фон */
 }
 
 /* Стили для форм */
 .auth-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    margin-top: 20px;
+    display: flex;  /* Гибкий контейнер */
+    flex-direction: column;  /* Расположение элементов в колонку */
+    align-items: center;  /* Выравнивание по центру */
+    gap: 15px;  /* Расстояние между элементами */
+    margin-top: 20px;  /* Отступ сверху */
 }
 
+/* Метки формы */
 .auth-form label {
-    font-size: 16px;
-    color: #333;
-    text-align: left;
-    width: 100%;
+    font-size: 16px;  /* Размер текста */
+    color: #333;  /* Цвет текста */
+    text-align: left;  /* Выравнивание текста слева */
+    width: 100%;  /* Растягивание на всю ширину */
 }
 
+/* Поля ввода формы */
 .auth-form input {
-    width: 80%;
-    max-width: 400px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-    outline: none;
-    transition: border-color 0.3s;
+    width: 80%;  /* Ширина поля */
+    max-width: 400px;  /* Максимальная ширина */
+    padding: 10px;  /* Внутренние отступы */
+    border: 1px solid #ccc;  /* Серый контур */
+    border-radius: 5px;  /* Закругленные углы */
+    font-size: 16px;  /* Размер текста */
+    outline: none;  /* Удаление стандартного контура */
+    transition: border-color 0.3s;  /* Плавное изменение цвета контура */
 }
 
+/* Эффект при фокусе на поле ввода */
 .auth-form input:focus {
-    border-color: #0288d1;
-    box-shadow: 0 0 5px rgba(2, 136, 209, 0.5);
+    border-color: #0288d1;  /* Синий контур */
+    box-shadow: 0 0 5px rgba(2, 136, 209, 0.5);  /* Легкая подсветка */
 }
 
+/* Кнопка отправки формы */
 .auth-form button {
-    width: 80%;
-    max-width: 400px;
-    padding: 10px 15px;
-    font-size: 18px;
-    color: white;
-    background: #0288d1;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s, transform 0.3s;
+    width: 80%;  /* Ширина кнопки */
+    max-width: 400px;  /* Максимальная ширина */
+    padding: 10px 15px;  /* Внутренние отступы */
+    font-size: 18px;  /* Размер текста */
+    color: white;  /* Белый цвет текста */
+    background: #0288d1;  /* Синий фон */
+    border: none;  /* Удаление рамки */
+    border-radius: 5px;  /* Закругленные углы */
+    cursor: pointer;  /* Изменение курсора на указатель */
+    transition: background 0.3s, transform 0.3s;  /* Плавные эффекты */
 }
 
+/* Анимация кнопки при наведении */
 .auth-form button:hover {
-    background: #03a9f4;
-    transform: scale(1.05);
+    background: #03a9f4;  /* Светло-синий фон */
+    transform: scale(1.05);  /* Лёгкое увеличение кнопки */
 }
 
 /* Обёртка для формы */
 .form-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    width: 100%;
-    max-width: 400px;
+    display: flex;  /* Используется гибкая раскладка для элементов внутри */
+    flex-direction: column;  /* Элементы располагаются вертикально */
+    align-items: center;  /* Центровка элементов по горизонтали */
+    gap: 20px;  /* Расстояние между элементами */
+    width: 100%;  /* Ширина обёртки на всю доступную площадь */
+    max-width: 400px;  /* Максимальная ширина обёртки */
 }
 
 .form-container h2 {
-    text-align: center;
-    margin-bottom: 20px;
+    text-align: center;  /* Текст заголовка выравнивается по центру */
+    margin-bottom: 20px;  /* Отступ снизу для разделения от других элементов */
 }
 
 .form-container .btn {
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 5px;
-    color: white;
-    text-decoration: none;
+    padding: 10px 20px;  /* Внутренние отступы по вертикали и горизонтали */
+    font-size: 16px;  /* Размер шрифта кнопки */
+    border-radius: 5px;  /* Закругленные углы */
+    color: white;  /* Белый текст */
+    text-decoration: none;  /* Убираем подчеркивание у кнопок-ссылок */
 }
 
 .form-container .btn-primary {
-    background-color: #0288d1;
+    background-color: #0288d1;  /* Основной голубой цвет кнопки */
 }
 
 .form-container .btn-danger {
-    background-color: red;
+    background-color: red;  /* Красный цвет для опасной кнопки */
 }
 
 /* Группа полей ввода */
@@ -316,38 +326,38 @@ main p strong {
 
 /* Кнопка отправки */
 .submit-btn {
-    background: #0288d1;
-    color: white;
-    font-size: 18px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    background: #0288d1;  /* Основной фон кнопки */
+    color: white;  /* Белый текст */
+    font-size: 18px;  /* Размер текста кнопки */
+    padding: 10px 20px;  /* Внутренние отступы кнопки */
+    border: none;  /* Убираем рамку */
+    border-radius: 5px;  /* Закругленные углы */
+    cursor: pointer;  /* Изменение указателя на курсор */
+    transition: background-color 0.3s ease;  /* Плавное изменение цвета */
 }
 
 .submit-btn:hover {
-    background-color: #03a9f4;
-    transform: scale(1.05);
+    background-color: #03a9f4;  /* Изменение цвета фона при наведении */
+    transform: scale(1.05);  /* Легкое увеличение кнопки */
 }
 
 /* Дополнительные ссылки */
 .extra-links {
-    margin-top: 20px;
-    font-size: 14px;
-    display: flex;
+    margin-top: 20px;  /* Отступ сверху от других элементов */
+    font-size: 14px;  /* Размер текста ссылок */
+    display: flex;  /* Использование гибкой раскладки */
     flex-direction: column; /* Располагает ссылки вертикально */
 }
 
 .extra-links a {
-    color: #0288d1;
-    text-decoration: none;
-    transition: color 0.3s ease;
+    color: #0288d1;  /* Голубой цвет текста */
+    text-decoration: none;  /* Убираем подчеркивание */
+    transition: color 0.3s ease;  /* Плавное изменение цвета текста */
     margin-bottom: 10px; /* Добавляем отступ между ссылками */
 }
 
 .extra-links a:hover {
-    color: #03a9f4;
+    color: #03a9f4;  /* Изменение цвета текста при наведении */
 }
 
 .settings-btn {
@@ -360,51 +370,51 @@ main p strong {
 }
 
 .settings-btn:hover {
-    color: #0288d1;
+    color: #0288d1;  /* Смена цвета шестерёнки на синий при наведении */
 }
 
 .settings-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 800px;  /* Максимальная ширина контейнера */
+    margin: 0 auto;  /* Выравнивание контейнера по центру страницы */
+    padding: 20px;  /* Внутренние отступы со всех сторон */
+    background: white;  /* Устанавливает белый фон контейнера */
+    border-radius: 8px;  /* Закругляет углы контейнера */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Добавляет лёгкую тень для объёма */
 }
 
 .settings-buttons {
-    margin-top: 20px;
-    display: flex;
-    gap: 20px;
+    margin-top: 20px;  /* Отступ сверху для группы кнопок */
+    display: flex;  /* Включает флексбокс для размещения кнопок */
+    gap: 20px;  /* Пространство между кнопками */
 }
 
 .settings-buttons .btn {
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 5px;
-    color: white;
-    text-decoration: none;
+    padding: 10px 20px;  /* Внутренние отступы кнопок */
+    font-size: 16px;  /* Размер текста кнопок */
+    border-radius: 5px;  /* Закругленные углы кнопок */
+    color: white;  /* Белый цвет текста */
+    text-decoration: none;  /* Убирает подчеркивание текста кнопок */
 }
 
 .settings-buttons .btn-primary {
-    background-color: #0288d1;
+    background-color: #0288d1;  /* Основной синий цвет для кнопки */
 }
 
 .settings-buttons .btn-danger {
-    background-color: red;
+    background-color: red;  /* Красный цвет для кнопки удаления или опасного действия */
 }
 
 .alert {
     background-color: #f8d7da; /* Светло-красный фон */
     color: #721c24; /* Темно-красный цвет текста */
     border: 1px solid #f5c6cb; /* Светло-красная рамка */
-    border-radius: 5px;
-    padding: 15px;
+    border-radius: 5px;  /* Закругленные углы */
+    padding: 15px;  /* Внутренние отступы */
     margin-bottom: 20px; /* Отступ снизу */
-    font-size: 16px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
+    font-size: 16px;  /* Размер текста уведомления */
+    font-weight: bold;  /* Жирное начертание текста */
+    display: flex;  /* Флексбокс для выравнивания содержимого */
+    align-items: center;  /* Выравнивание текста и иконки по вертикали */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Легкая тень */
     transition: transform 0.3s ease-in-out, opacity 0.3s ease; /* Плавный переход */
 }
@@ -416,13 +426,13 @@ main p strong {
 }
 
 .alert.show {
-    transform: translateY(0);
-    opacity: 1;
+    transform: translateY(0);  /* Отображение в исходном положении */
+    opacity: 1;  /* Полная видимость */
 }
 
 .alert.hide {
-    transform: translateY(-20px);
-    opacity: 0;
+    transform: translateY(-20px);  /* Смещение вверх */
+    opacity: 0;  /* Прозрачность */
 }
 
 /* Стиль для ошибочных полей ввода */
@@ -432,15 +442,15 @@ main p strong {
 
 /* Стиль для ошибок в формах */
 .auth-form input:invalid {
-    box-shadow: 0 0 5px rgba(227, 52, 47, 0.7);
+    box-shadow: 0 0 5px rgba(227, 52, 47, 0.7);  /* Повторный стиль для другой формы */
 }
 
 /* Стили для кнопки отправки при ошибке */
 .submit-btn.error {
     background: #e3342f; /* Красный фон для кнопки ошибки */
-    color: white;
-    border-color: #e3342f;
-    transition: background 0.3s ease, transform 0.3s ease;
+    color: white;  /* Белый цвет текста */
+    border-color: #e3342f;  /* Красный цвет рамки */
+    transition: background 0.3s ease, transform 0.3s ease;  /* Плавные эффекты */
 }
 
 .submit-btn.error:hover {
@@ -450,19 +460,19 @@ main p strong {
 
 /* Эффект при наведении на блок с информацией */
 .profile-info {
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: transform 0.3s, box-shadow 0.3s;  /* Плавные эффекты при наведении */
 }
 
 .profile-info:hover {
-  transform: scale(1.02);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  transform: scale(1.02);  /* Лёгкое увеличение блока */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);  /* Усиленная тень */
 }
 
 /* Стиль для модального окна с голубым фоном и глянцевым эффектом */
 .custom-modal-content {
     background-color: #e0f7fa; /* Нежный голубой цвет */
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;  /* Скругляет углы */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Добавляет легкую тень */
     border: 1px solid #b2ebf2; /* Легкая голубая рамка */
     background: linear-gradient(145deg, #e0f7fa, #b2ebf2); /* Гладкий градиент с глянцевым эффектом */
 }
@@ -470,8 +480,8 @@ main p strong {
 /* Стиль для шапки модального окна */
 .custom-modal-header {
     background-color: #b2ebf2; /* Голубая шапка */
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    border-top-left-radius: 8px;  /* Скругляет левый верхний угол */
+    border-top-right-radius: 8px;  /* Скругляет правый верхний угол */
     color: #004d40; /* Тёмный текст для контраста */
 }
 
@@ -483,34 +493,39 @@ main p strong {
 
 .custom-modal-footer .btn-primary:hover {
     background-color: #004d40; /* При наведении кнопка станет темнее */
-    border-color: #00796b;
+    border-color: #00796b;  /* Граница меняет цвет на более светлый */
 }
 
+/* Стиль для формы управления клиентами */
 .client-controls form {
-    display: flex;
-    align-items: center;
+    display: flex;  /* Размещает элементы в строку */
+    align-items: center;  /* Выравнивает элементы по центру */
     flex-wrap: nowrap; /* Отключаем перенос строк внутри формы */
 }
 
+/* Стиль для полей ввода и выбора в форме */
 .client-controls .form-control,
 .client-controls .form-select {
-    width: 30%;
+    width: 30%;  /* Устанавливает ширину в 30% */
     min-width: 200px; /* Минимальная ширина для читабельности */
 }
 
+/* Стиль для верхнего блока клиентов */
 .clients-top {
-    display: flex;
+    display: flex;  /* Размещает элементы в строку */
     justify-content: space-around; /* Распределяет элементы с одинаковыми промежутками */
-    align-items: center;
-    width: 100%;
+    align-items: center;  /* Выравнивает элементы по вертикали */
+    width: 100%;  /* Устанавливает ширину на всю строку */
 }
 
+/* Стиль для блока поиска */
 .search1 {
     position: relative; /* Сохраняем позиционирование относительно родителя */
     display: flex;      /* Выравниваем элементы в строку */
     align-items: flex-start; /* Выравниваем элементы по верхнему краю */
 }
 
+/* Стиль для выпадающего списка */
 .list-group {
     position: absolute; /* Абсолютное позиционирование относительно родителя */
     top: 100%; /* Располагаем ниже ячейки поиска */
@@ -523,26 +538,27 @@ main p strong {
 /* Убираем стрелочки в браузере Chrome, Edge */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+    -webkit-appearance: none;  /* Скрывает стрелки */
+    margin: 0;  /* Убирает отступы */
 }
 
 /* Убираем стрелочки в браузере Firefox */
 input[type="number"] {
-    -moz-appearance: textfield;
+    -moz-appearance: textfield;  /* Превращает поле в текстовое */
 }
 
+/* Стиль для выпадающего меню */
 .dropdown-menu {
     background-color: white; /* Белый фон */
     border: 1px solid #ccc;  /* Граница */
     max-height: 200px;       /* Максимальная высота */
     overflow-y: auto;        /* Скроллинг для длинного списка */
     list-style: none;        /* Убираем точки перед элементами */
-    padding: 0;
-    margin: 0;
+    padding: 0;  /* Убирает внутренние отступы */
+    margin: 0;  /* Убирает внешние отступы */
     width: auto;             /* Автоматическая ширина */
     min-width: 100%;         /* Минимальная ширина равна ширине поля ввода */
-    z-index: 1000;
+    z-index: 1000;  /* Приоритет отображения */
     position: absolute;      /* Абсолютное позиционирование */
     left: 0;                 /* Привязка к левому краю родителя */
     top: 100%;               /* Расположение сразу под полем ввода */
@@ -551,26 +567,30 @@ input[type="number"] {
     pointer-events: auto;    /* Убедимся, что взаимодействие возможно */
 }
 
+/* Стиль для пунктов меню */
 .dropdown-menu li {
     padding: 8px 12px;        /* Внутренние отступы */
     cursor: pointer;          /* Указатель мыши при наведении */
     text-align: left;         /* Выравнивание текста по левому краю */
 }
 
+/* Изменение стиля при наведении на пункт меню */
 .dropdown-menu li:hover {
     background-color: #f0f0f0; /* Изменение фона при наведении */
 }
 
+/* Стиль для карточки клиента */
 .profile-client {
-    padding: 20px;
+    padding: 20px;  /* Внутренние отступы */
     background: #ffffff; /* Чистый белый */
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); /* Легкий глянец */
-    border-radius: 10px;
+    border-radius: 10px;  /* Скругленные углы */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Легкая тень */
     transition: transform 0.3s ease, box-shadow 0.3s ease; /* Плавный переход */
-    position: relative;
+    position: relative;  /* Относительное позиционирование */
 }
 
+/* Эффекты при наведении на карточку */
 .profile-client:hover {
     transform: scale(1.02); /* Легкое увеличение */
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Увеличенная тень */
@@ -578,18 +598,18 @@ input[type="number"] {
 
 /* Стиль для кнопки назад */
 .back-btn {
-    top: 20px;
-    left: 20px;
-    width: 40px;
-    height: 40px;
+    top: 20px;  /* Расстояние от верхнего края */
+    left: 20px;  /* Расстояние от левого края */
+    width: 40px;  /* Размер кнопки по ширине */
+    height: 40px;  /* Размер кнопки по высоте */
     border-radius: 50%; /* Делает кнопку круглой */
     background-color: #03a9f4; /* Фон кнопки */
     color: white; /* Цвет стрелки */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-decoration: none;
-    font-size: 20px;
+    display: flex;  /* Включаем flex для выравнивания содержимого */
+    justify-content: center;  /* Центрируем содержимое по горизонтали */
+    align-items: center;  /* Центрируем содержимое по вертикали */
+    text-decoration: none;  /* Убираем подчеркивание текста */
+    font-size: 20px;  /* Размер текста */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Легкая тень */
     transition: transform 0.2s ease, background-color 0.2s ease; /* Плавное увеличение при наведении */
 }
@@ -601,8 +621,8 @@ input[type="number"] {
 }
 
 .client-settings {
-    display: flex;
-    gap: 20px;
+    display: flex;  /* Устанавливаем блочное выравнивание для элементов */
+    gap: 20px;  /* Устанавливаем расстояние между элементами */
     word-wrap: break-word; /* Перенос слов, если они слишком длинные */
 }
 
@@ -612,39 +632,39 @@ input[type="number"] {
 }
 
 .client-settings .settings-buttons {
-    margin-top: 0px;
+    margin-top: 0px;  /* Убираем верхний отступ для кнопок */
 }
 
 .schedule-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
+    display: grid;  /* Применяем CSS Grid для построения сетки */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));  /* Автоматически заполняем доступное пространство колонками */
+    gap: 1rem;  /* Устанавливаем расстояние между элементами сетки */
 }
 
 .schedule-day {
-    border: 1px solid #ddd;
-    padding: 10px;
-    border-radius: 5px;
-    background-color: #e0f7fa;
+    border: 1px solid #ddd;  /* Граница для каждого элемента */
+    padding: 10px;  /* Внутренние отступы */
+    border-radius: 5px;  /* Скругленные углы */
+    background-color: #e0f7fa;  /* Светлый фон */
 }
 
 #search-res {
-    max-height: 200px;
-    overflow-y: auto;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-top: none;
+    max-height: 200px;  /* Ограничиваем высоту */
+    overflow-y: auto;  /* Добавляем вертикальную прокрутку, если контент превышает высоту */
+    background-color: white;  /* Белый фон для удобства чтения */
+    border: 1px solid #ccc;  /* Граница */
+    border-top: none;  /* Убираем верхнюю границу */
 }
 
 .schedule-one {
-    padding: 10px;
-    margin-bottom: 10px;
-    background: #e9ecef;
-    border-radius: 10px;
+    padding: 10px;  /* Внутренние отступы */
+    margin-bottom: 10px;  /* Расстояние между блоками */
+    background: #e9ecef;  /* Светлый серый фон */
+    border-radius: 10px;  /* Скругленные углы */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Легкая тень */
     transition: transform 0.3s ease, box-shadow 0.3s ease; /* Плавный переход */
-    position: relative;
-    cursor: pointer;
+    position: relative;  /* Устанавливаем позиционирование */
+    cursor: pointer;  /* Курсор меняется на указатель */
 }
 
 /* Эффект при наведении на блок с информацией */
@@ -659,121 +679,127 @@ input[type="number"] {
 
 /* При необходимости, добавляем кастомный стиль */
 input[type="date"] {
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    background: #fff;
+    padding: 5px;  /* Внутренние отступы */
+    border: 1px solid #ccc;  /* Граница */
+    border-radius: 4px;  /* Скругленные углы */
+    font-size: 16px;  /* Размер шрифта */
+    background: #fff;  /* Белый фон */
 }
 
 .btn-outline-success {
-    --bs-btn-hover-color: #198754;
-    --bs-btn-hover-bg: #fff;
-    --bs-btn-hover-border-color: #198754;
+    --bs-btn-hover-color: #198754;  /* Цвет текста при наведении */
+    --bs-btn-hover-bg: #fff;  /* Цвет фона при наведении */
+    --bs-btn-hover-border-color: #198754;  /* Цвет границы при наведении */
 }
 
 .btn-outline-primary {
-    --bs-btn-hover-color: #0d6efd;
-    --bs-btn-hover-bg: #fff;
-    --bs-btn-hover-border-color: #0d6efd;
+    --bs-btn-hover-color: #0d6efd;  /* Цвет текста при наведении */
+    --bs-btn-hover-bg: #fff;  /* Цвет фона при наведении */
+    --bs-btn-hover-border-color: #0d6efd;  /* Цвет границы при наведении */
 }
 
 .btn-outline-danger {
-    --bs-btn-hover-color: #dc3545;
-    --bs-btn-hover-bg: #fff;
-    --bs-btn-hover-border-color: #dc3545;
+    --bs-btn-hover-color: #dc3545;  /* Цвет текста при наведении */
+    --bs-btn-hover-bg: #fff;  /* Цвет фона при наведении */
+    --bs-btn-hover-border-color: #dc3545;  /* Цвет границы при наведении */
 }
 
 .btn-group-sm>.btn, .btn-sm {
-    --bs-btn-font-size: 0.75rem;
+    --bs-btn-font-size: 0.75rem;  /* Размер шрифта для маленьких кнопок */
 }
 
 .analytics-container {
-    display: grid;
-    gap: 1.5rem;
+    display: grid;  /* Используем Grid Layout для аналитики */
+    gap: 1.5rem;  /* Устанавливаем расстояние между блоками */
 }
 
 .analytics-block {
-    background: #fff;
-    border-radius: 10px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    background: #fff;  /* Белый фон для блоков аналитики */
+    border-radius: 10px;  /* Скругленные углы */
+    padding: 1.5rem;  /* Внутренние отступы */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);  /* Легкая тень */
 }
 
 .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    display: grid;  /* Применяем Grid Layout для статистики */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));  /* Колонки подстраиваются под доступное пространство */
+    gap: 1rem;  /* Расстояние между элементами */
+    margin-bottom: 1.5rem;  /* Отступ снизу */
 }
 
 .stat-item {
-    background: linear-gradient(to bottom, #e0f7fa, #90deea);
-    padding: 1rem;
-    border-radius: 8px;
-    text-align: center;
+    background: linear-gradient(to bottom, #e0f7fa, #90deea);  /* Градиентный фон */
+    padding: 1rem;  /* Внутренние отступы */
+    border-radius: 8px;  /* Скругленные углы */
+    text-align: center;  /* Центрируем текст */
 }
 
 .stat-label {
-    font-size: 0.9rem;
-    color: #666;
+    font-size: 0.9rem;  /* Размер шрифта */
+    color: #666;  /* Светло-серый цвет текста */
 }
 
 .stat-value {
-    font-size: 1.1rem;
-    font-weight: bold;
+    font-size: 1.1rem;  /* Увеличенный размер шрифта */
+    font-weight: bold;  /* Жирный текст */
     color: #007bff; /* Основной цвет приложения */
 }
 
 .clients-stats {
-    display: grid;
-    gap: 1rem;
+    display: grid;  /* Сетка для статистики клиентов */
+    gap: 1rem;  /* Расстояние между блоками */
 }
 
 .client-stat {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background-color: #f9f9f9;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;  /* Гибкий контейнер для блока */
+    justify-content: space-between;  /* Распределяем элементы по краям */
+    align-items: center;  /* Выравниваем элементы по центру вертикально */
+    padding: 10px;  /* Внутренние отступы */
+    background-color: #f9f9f9;  /* Светлый фон */
+    margin-bottom: 10px;  /* Отступ снизу */
+    border-radius: 8px;  /* Скругленные углы */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Легкая тень */
 }
 
+/* Общий контейнер для списка встреч */
 .meetings-list {
-    display: grid;
-    gap: 0.5rem;
+    display: grid;  /* Используем сетку для равномерного расположения встреч */
+    gap: 0.5rem;  /* Расстояние между элементами списка */
 }
 
+/* Стиль отдельной встречи */
 .meeting-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem;
-    background: #f8f9fa;
-    border-radius: 6px;
+    display: flex;  /* Расположение элементов в строку */
+    justify-content: space-between;  /* Элементы равномерно распределены по краям */
+    align-items: center;  /* Центрируем элементы по вертикали */
+    padding: 0.5rem;  /* Внутренний отступ для удобного размещения контента */
+    background: #f8f9fa;  /* Светлый фон для выделения */
+    border-radius: 6px;  /* Скругленные углы */
 }
 
+/* Имя клиента */
 .client-name {
-    font-weight: bold;
+    font-weight: bold;  /* Жирный шрифт для выделения */
     font-size: 16px; /* Размер шрифта имени */
     flex: 1; /* Занимает все доступное пространство слева */
 }
 
+/* Контейнер для статистики клиента */
 .client-numbers {
-    display: flex;
+    display: flex;  /* Элементы располагаются в строку */
     gap: 15px; /* Расстояние между элементами */
 }
 
+/* Общая информация о клиенте */
 .client-info {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    display: flex;  /* Располагаем элементы в строку */
+    flex-wrap: wrap;  /* При нехватке места элементы переносятся на новую строку */
+    align-items: center;  /* Центрируем элементы по вертикали */
     gap: 20px; /* Пространство между именем и статистикой */
-    width: 100%;
+    width: 100%;  /* Контейнер занимает всю ширину */
 }
 
+/* Статистика клиента */
 .client-number {
     font-size: 16px; /* Размер шрифта для статистики */
 }
@@ -781,44 +807,44 @@ input[type="date"] {
 /* Стили для мобильной версии */
 @media (max-width: 768px) {
     .navbar {
-        flex-direction: column;
-        align-items: center;
+        flex-direction: column; /* Изменяем направление на вертикальное */
+        align-items: center;  /* Центрируем элементы */
     }
 
     .navbar ul {
-        flex-direction: column;
-        align-items: center;
+        flex-direction: column;  /* Список ссылок располагается вертикально */
+        align-items: center;  /* Центрируем элементы списка */
     }
 
     .navbar ul li {
-        margin: 10px 0;
+        margin: 10px 0;  /* Увеличиваем отступы между пунктами */
     }
 
     .navbar ul li a {
-        font-size: 18px;
-        padding: 10px 20px;
+        font-size: 18px;  /* Увеличиваем шрифт ссылок */
+        padding: 10px 20px;  /* Увеличиваем отступы для удобства нажатия */
     }
 
     .logo {
-        height: 80px;
+        height: 80px;  /* Увеличиваем размер логотипа */
     }
 
     .app-name {
-        font-size: 30px;
-        padding: 5px 10px;
+        font-size: 30px;  /* Увеличиваем размер шрифта имени приложения */
+        padding: 5px 10px;  /* Добавляем отступы */
     }
 
     main {
-        padding: 20px;
-        margin: 10px;
+        padding: 20px;  /* Увеличиваем внутренние отступы */
+        margin: 10px;  /* Внешние отступы для удобного размещения */
     }
 
     main p {
-        font-size: 16px;
+        font-size: 16px;  /* Увеличиваем размер текста */
     }
 
     main p strong {
-        font-size: 18px;
+        font-size: 18px;  /* Увеличиваем шрифт для выделения */
     }
 
     /* Стили для кнопок */
@@ -827,15 +853,15 @@ input[type="date"] {
     }
 
     .settings-buttons .btn {
-        font-size: 12px;
-        margin: 5;
-        padding: 5;
+        font-size: 12px;  /* Уменьшаем размер текста */
+        margin: 5;  /* Внешний отступ кнопок */
+        padding: 5;  /* Внутренний отступ кнопок */
 
     }
 
     .clients-top {
         flex-direction: column; /* Элементы друг под другом */
-        gap: 8px;
+        gap: 8px;  /* Расстояние между элементами */
     }
 
     .search1 input[type="text"] {
@@ -852,15 +878,12 @@ input[type="date"] {
     }
 
     .analytics-block {
-        padding: 5;
+        padding: 5;  /* Уменьшаем внутренние отступы */
     }
 
     .client-settings {
         flex-direction: column; /* Меняем на вертикальное расположение */
         gap: 1px; /* Уменьшаем разрыв для небольших экранов */
-    }
-
-    .client-settings {
         padding: 10px; /* Уменьшаем отступы для маленьких экранов */
         font-size: 14px; /* Уменьшаем размер текста */
     }
@@ -876,7 +899,7 @@ input[type="date"] {
     }
 
     .client-stat {
-        display: inline-block;
+        display: inline-block;  /* Располагаем элементы в строку */
     }
 
     .client-stat-item {
@@ -884,7 +907,7 @@ input[type="date"] {
     }
 
     .stat-label {
-        font-size: 12px; /* Также уменьшаем размер шрифта */
+        font-size: 14px; /* Также уменьшаем размер шрифта */
     }
 
     .profile-info p strong {
@@ -899,6 +922,6 @@ input[type="date"] {
 
     .meeting-item {
         font-size: 14px; /* Также уменьшаем размер шрифта */
-        display: inline-block;
+        display: inline-block;  /* Располагаем элементы в строку */
     }
 }
